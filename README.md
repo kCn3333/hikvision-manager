@@ -6,7 +6,6 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 
 ![Java](https://img.shields.io/badge/Java-24-2496ED)
 ![SpringBoot](https://img.shields.io/badge/Spring_Boot_3.5.7-555555?style=flat-square&logo=springboot&logoColor=3fb950)
-![Caffeine](https://img.shields.io/badge/Caffeine_Cache-555555?style=flat-square&logo=cache&logoColor=3fb950)
 ![FFmpeg](https://img.shields.io/badge/FFmpeg_8.0-555555?style=flat-square&logo=ffmpeg&logoColor=3fb950)
 ![Maven](https://img.shields.io/badge/Maven-555555?style=flat-square&logo=apache&logoColor=3fb950)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_16-555555?style=flat-square&logo=postgresql&logoColor=3fb950)
