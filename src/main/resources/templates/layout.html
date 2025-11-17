@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hikvision Manager</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%2328a745' d='M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2z'/></svg>">
+
+    <!-- Bootstrap + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/bootstrap-overrides.css}" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid">
+        <!-- Brand -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-icon"><i class="bi bi-camera-video"></i></span>
+            <span class="brand-text">Hikvision Manager</span>
+        </a>
+
+        <!-- Hamburger -->
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarMenu"
+                aria-controls="navbarMenu"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menu -->
+        <div class="collapse navbar-collapse justify-content-end" id="navbarMenu">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${currentPath.startsWith('/index')} ? 'active' : ''"
+                       th:href="@{/}">
+                        <i class="bi bi-house-door me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${currentPath.startsWith('/recordings')} ? 'active' : ''"
+                       th:href="@{/recordings}">
+                        <i class="bi bi-hdd-stack me-1"></i> Recordings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${currentPath.startsWith('/backups')} ? 'active' : ''"
+                       th:href="@{/backups}">
+                        <i class="bi bi-gear me-1"></i> Backup Settings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${currentPath.startsWith('/backup-history')} ? 'active' : ''"
+                       th:href="@{/backup-history}">
+                        <i class="bi bi-clipboard-data me-1"></i> Backup History
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${currentPath.startsWith('/info')} ? 'active' : ''"
+                       th:href="@{/info}">
+                        <i class="bi bi-info-circle me-1"></i> Info
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN CONTENT WRAPPER -->
+<div class="main-wrapper">
+    <div class="container-fluid main-content" th:insert="${content}"></div>
+</div>
+
+<!-- APP FOOTER -->
+<footer class="app-footer">
+    <div class="app-footer-content">
+        <div class="app-info">
+            <span class="app-name">Hikvision Manager</span>
+            <span class="app-version">v0.3.3</span>
+
+        </div>
+        <a href="https://github.com/kCn3333/hikvision-manager" target="_blank" class="github-badge">
+            <i class="bi bi-github"></i>
+            GitHub
+        </a>
+        <div class="app-author">
+            <span class="app-author">by <a href="https://kcn333.pl" target="_blank">kCn</a> &copy; 2025</span>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::body})}">
+<body>
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+
+        <!-- Left: Connected Panel -->
+        <div class="connected-panel">
+            <div id="camera-status-panel" class="card shadow-sm">
+                <div class="card-header card-header-spread">
+                    <span><i class="bi bi-activity"></i> Connected</span>
+                    <span id="connection-dot" class="status-dot disconnected"></span>
+                </div>
+                <div class="card-body text-white">
+                    <p><strong>CPU:</strong> <span id="cpuUsage">-</span>%</p>
+                    <p><strong>Memory:</strong> <span id="memoryUsage">-</span>%</p>
+                    <p><strong>Uptime:</strong> <span id="uptime">-</span></p>
+                    <p><strong>Device Time:</strong> <span id="deviceTime">-</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Main Panel - Video Player -->
+        <div class="main-panel">
+            <div class="card shadow-sm">
+                <div class="card-header card-header-spread">
+                    <h5><i class="bi bi-camera-video me-2"></i> Live Stream</h5>
+                    <div class="header-actions">
+                        <span id="streamInfoInline" class="stream-info-inline text-muted small">
+                            <span id="streamResolution">—</span> •
+                            <span id="streamCodec">H.264</span>
+                        </span>
+                        <span class="text-muted small">status:</span>
+                        <span id="stream-dot" class="status-dot disconnected"></span>
+                    </div>
+                </div>
+
+                <div class="card-body bg-dark p-0">
+                    <!-- Video Player Container -->
+                    <div class="video-container position-relative">
+                        <video id="videoPlayer"
+                               class="w-100"
+                               playsinline
+                               controls>
+                        </video>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="stream-controls p-3 border-top border-secondary">
+                        <div class="row g-3 align-items-center">
+                            <!-- Channel Selection -->
+                            <div class="col-auto">
+                                <label for="channelSelect" class="form-label mb-0">Channel:</label>
+                            </div>
+                            <div class="col-auto">
+                                <select id="channelSelect" class="form-select">
+                                    <option value="101">Main Stream (101)</option>
+                                    <option value="102">Sub Stream (102)</option>
+                                </select>
+                            </div>
+
+                            <!-- Stream Controls -->
+                            <div class="col-auto ms-auto">
+                                <button id="startBtn" class="btn btn-success">
+                                    <i class="bi bi-play-fill"></i> Start Stream
+                                </button>
+                                <button id="stopBtn" class="btn btn-danger ms-2" disabled>
+                                    <i class="bi bi-stop-fill"></i> Stop Stream
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- HLS.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<!-- Scripts - ES6 Modules -->
+<script type="module" th:src="@{/js/features/camera-status.js}"></script>
+<script type="module" th:src="@{/js/features/live-stream.js}"></script>
+
+</body>
+</html>

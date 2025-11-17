@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::body})}">
+<body>
+<div class="dashboard-container">
+    <div class="dashboard-inner">
+
+        <!-- Left: Connected Panel -->
+        <div class="connected-panel">
+            <div id="camera-status-panel" class="card shadow-sm">
+                <div class="card-header card-header-spread">
+                    <span><i class="bi bi-activity"></i> Connected</span>
+                    <span id="connection-dot" class="status-dot disconnected"></span>
+                </div>
+                <div class="card-body text-white">
+                    <p><strong>CPU:</strong> <span id="cpuUsage">-</span>%</p>
+                    <p><strong>Memory:</strong> <span id="memoryUsage">-</span>%</p>
+                    <p><strong>Uptime:</strong> <span id="uptime">-</span></p>
+                    <p><strong>Device Time:</strong> <span id="deviceTime">-</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Main Panel -->
+        <div class="main-panel">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle me-2"></i> Camera Device Info</h5>
+                </div>
+
+                <!-- Main Content -->
+                <div class="container-fluid py-4 text-white">
+                    <div class="row g-4">
+                        <!-- Device Info -->
+                        <div class="col-md-4">
+                            <div class="card bg-dark border-0 shadow-sm h-100 bordered">
+                                <div class="card-header border-secondary fw-bold">
+                                    <i class="bi bi-hdd-network me-2"></i> Device
+                                </div>
+                                <div class="card-body small text-secondary">
+                                    <p><strong class="text-light">Name:</strong> <span id="deviceName">—</span></p>
+                                    <p><strong class="text-light">Description:</strong> <span id="deviceDescription">—</span></p>
+                                    <p><strong class="text-light">Manufacturer:</strong> <span id="manufacturer">—</span></p>
+                                    <p><strong class="text-light">Model:</strong> <span id="model">—</span></p>
+                                    <p><strong class="text-light">Serial Number:</strong> <span id="serialNumber">—</span></p>
+                                    <p><strong class="text-light">Firmware:</strong> <span id="firmwareVersion">—</span></p>
+                                    <p><strong class="text-light">Build Date:</strong> <span id="firmwareReleasedDate">—</span></p>
+                                    <p><strong class="text-light">Location:</strong> <span id="deviceLocation">—</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Network Info -->
+                        <div class="col-md-4">
+                            <div class="card bg-dark border-0 shadow-sm h-100 bordered">
+                                <div class="card-header border-secondary fw-bold">
+                                    <i class="bi bi-router me-2"></i> Network
+                                </div>
+                                <div class="card-body small text-secondary">
+                                    <p><strong class="text-light">IP Address:</strong> <span id="ipAddress">—</span></p>
+                                    <p><strong class="text-light">MAC Address:</strong> <span id="macAddress">—</span></p>
+                                    <p><strong class="text-light">Subnet Mask:</strong> <span id="subnetMask">—</span></p>
+                                    <p><strong class="text-light">Gateway:</strong> <span id="defaultGateway">—</span></p>
+                                    <p><strong class="text-light">DNS Server:</strong> <span id="dnsServer">—</span></p>
+                                    <p><strong class="text-light">Speed:</strong> <span id="speed">—</span></p>
+                                    <p><strong class="text-light">MTU:</strong> <span id="mtu">—</span></p>
+                                    <p><strong class="text-light">Duplex:</strong> <span id="duplex">—</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Time Info -->
+                        <div class="col-md-4">
+                            <div class="card bg-dark border-0 shadow-sm h-100 bordered">
+                                <div class="card-header border-secondary fw-bold">
+                                    <i class="bi bi-clock-history me-2"></i> Time
+                                </div>
+                                <div class="card-body small text-secondary">
+                                    <p><strong class="text-light">Mode:</strong> <span id="timeMode">—</span></p>
+                                    <p><strong class="text-light">Local Time:</strong> <span id="formattedLocalTime">—</span></p>
+                                    <p><strong class="text-light">Time Zone:</strong> <span id="formattedTimeZone">—</span></p>
+                                    <p><strong class="text-light">NTP Enabled:</strong> <span id="ntpEnabled">—</span></p>
+                                    <p><strong class="text-light">Status:</strong> <span id="statusMessage">—</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Restart Camera Button -->
+                        <div class="col-12 text-center mt-4">
+                            <button id="restart-btn" class="btn btn-success btn-md">
+                                <i class="bi bi-arrow-repeat"></i> Restart Camera
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- / Main Content -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Restart Modal -->
+<div class="modal fade" id="restartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border border-secondary text-center p-4">
+            <div class="modal-body">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-arrow-repeat text-success me-2"></i> Restarting Camera...
+                </h5>
+                <div class="spinner-border text-success mb-3" role="status">
+                    <span class="visually-hidden">Restarting...</span>
+                </div>
+                <p class="small text-secondary mb-0">Please wait while the camera restarts.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- External JS -->
+<script th:inline="javascript">window.sessionId = [[${sessionId}]];</script>
+<script type="module" th:src="@{/js/features/camera-status.js}"></script>
+<script type="module" th:src="@{/js/features/device-info.js}"></script>
+<script type="module" th:src="@{/js/features/camera-restart.js}"></script>
+</body>
+</html>
