@@ -1,5 +1,5 @@
 
-# ![Camera](images/logo.png)
+<div align="center">  <img src="images/logo.png"> </div>
 
 Hikvision Manager is a Spring Boot application designed to manage Hikvision Cameras, execute backup jobs, store backup history, and provide a UI for browsing and downloading recordings.
 It integrates with Hikvision ISAPI endpoints, schedules recording backups, stores metadata in PostgreSQL, and exposes a management dashboard. Also provides HTTP Live Streaming by HLS and FFmpeg.
@@ -13,7 +13,7 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-555555?style=flat-square&logo=thymeleaf&logoColor=3fb950)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-555555?logo=bootstrap&logoColor=3fb950)
 ![Javascript](https://img.shields.io/badge/JavaScript-555555?logo=javascript&logoColor=3fb950)
-![Docker](https://img.shields.io/badge/Docker_Ready-555555?style=flat-square&logo=docker&logoColor=3fb950)
+![Docker](https://img.shields.io/badge/Docker_Ready-555555?style=flat-square&logo=docker&logoColor=blue)
 
 ## ✨ Features
 
