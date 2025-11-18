@@ -1,5 +1,6 @@
 package com.kcn.hikvisionmanager.config;
 
+import com.kcn.hikvisionmanager.domain.BackupTimeRangeStrategy;
 import com.kcn.hikvisionmanager.exception.StorageException;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -45,6 +46,16 @@ public class BackupConfig {
     private final String defaultScheduleCron;
 
     /**
+     * Maximum number of recordings to process in a single backup job
+     */
+    private final int maxRecordingsPerBackup;
+
+    /**
+     * Default strategy for determining backup time range
+     */
+    private final BackupTimeRangeStrategy defaultStrategy;
+
+    /**
      * Maximum number of retry attempts for failed backup tasks.
      */
     private final int retryMaxAttempts;
@@ -60,17 +71,21 @@ public class BackupConfig {
      * @param baseDir Base directory for backups
      * @param defaultRetentionDays Number of days to retain backups
      * @param scheduleCron Cron expression for backup scheduling
+     * @param maxRecordingsPerBackup max number of recordings for backup
+     * @param defaultStrategy to determine backup time range
      * @param retryMaxAttempts Maximum retry attempts
      * @param retryDelay Delay between retries
      */
     public BackupConfig(Path baseDir,
                         int defaultRetentionDays,
-                        String scheduleCron,
+                        String scheduleCron, int maxRecordingsPerBackup, BackupTimeRangeStrategy defaultStrategy,
                         int retryMaxAttempts,
                         Duration retryDelay) {
         this.baseDir = baseDir;
         this.defaultRetentionDays = defaultRetentionDays;
         this.defaultScheduleCron = scheduleCron;
+        this.maxRecordingsPerBackup = maxRecordingsPerBackup;
+        this.defaultStrategy = defaultStrategy;
         this.retryMaxAttempts = retryMaxAttempts;
         this.retryDelay = retryDelay;
     }

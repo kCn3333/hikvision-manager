@@ -1,5 +1,6 @@
 package com.kcn.hikvisionmanager.service.backup;
 
+import com.kcn.hikvisionmanager.config.BackupConfig;
 import com.kcn.hikvisionmanager.domain.*;
 import com.kcn.hikvisionmanager.dto.RecordingItemDTO;
 import com.kcn.hikvisionmanager.dto.RecordingSearchRequestDTO;
@@ -43,8 +44,8 @@ public class BackupExecutor {
     private final BackupConfigurationRepository backupConfigurationRepository;
     private final BackupJobRepository backupJobRepository;
     private final BackupRecordingRepository backupRecordingRepository;
+    private final BackupConfig backupConfig;
 
-    private static final int MAX_RECORDINGS_PER_BACKUP = 1000;
 
     /**
      * Execute backup for the given configuration.
@@ -64,7 +65,7 @@ public class BackupExecutor {
             // Get time range strategy (with default for backward compatibility)
             BackupTimeRangeStrategy strategy = config.getTimeRangeStrategy() != null
                     ? config.getTimeRangeStrategy()
-                    : BackupTimeRangeStrategy.LAST_HOUR;
+                    : backupConfig.getDefaultStrategy();
 
             // Calculate date range based on strategy
             BackupDateRange backupDateRange = calculateDateRange(strategy, now);
@@ -88,10 +89,10 @@ public class BackupExecutor {
             }
 
             // Warn if max limit reached
-            if (searchResult.getRecordings().size() >= MAX_RECORDINGS_PER_BACKUP) {
+            if (searchResult.getRecordings().size() >= backupConfig.getMaxRecordingsPerBackup()) {
                 log.warn("⚠️ Recording limit reached: {} recordings found (limit: {}). " +
                                 "Some recordings may not be backed up.",
-                        searchResult.getRecordings().size(), MAX_RECORDINGS_PER_BACKUP);
+                        searchResult.getRecordings().size(), backupConfig.getMaxRecordingsPerBackup());
             }
 
             // Prepare backup recordings
@@ -389,7 +390,7 @@ public class BackupExecutor {
                 .startTime(startTime)
                 .endTime(endTime)
                 .page(1)
-                .pageSize(MAX_RECORDINGS_PER_BACKUP)
+                .pageSize(backupConfig.getMaxRecordingsPerBackup())
                 .build();
 
         return recordingService.searchRecordings(request);
