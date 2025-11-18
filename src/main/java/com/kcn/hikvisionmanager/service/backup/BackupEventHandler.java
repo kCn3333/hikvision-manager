@@ -114,7 +114,7 @@ public class BackupEventHandler {
     public void onBackupBatchCompleted(BackupDownloadCompletedEvent event) {
         String backupId = event.batchId();
 
-        log.info("\uD83D\uDC42 Backup batch completed event received: {}", backupId);
+        log.debug("\uD83D\uDC42 Backup batch completed event received: {}", backupId);
 
         backupExecutor.finalizeBackup(backupId);
     }

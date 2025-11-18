@@ -24,7 +24,7 @@ public class StreamsController {
 
     private final Path baseStreamDir;
 
-    public StreamsController(@Value("${backup.temp-dir}") String basePath) {
+    public StreamsController(@Value("${stream.temp-dir}") String basePath) {
         this.baseStreamDir = Paths.get(basePath);
         log.info("🎬 HttpStreamsController initialized. Base dir: {}", this.baseStreamDir.toAbsolutePath());
     }

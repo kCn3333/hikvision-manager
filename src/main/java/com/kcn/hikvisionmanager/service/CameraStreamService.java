@@ -39,7 +39,7 @@ public class CameraStreamService {
                                FFmpegProcessHandler processHandler,
                                @Qualifier("liveStreamCache") Cache<String,
                                        RunningStream> liveStreamCache,
-                               @Value("${backup.temp-dir}") String basePath) {
+                               @Value("${stream.temp-dir}") String basePath) {
         this.urlBuilder = urlBuilder;
         this.commandBuilder = commandBuilder;
         this.processHandler = processHandler;

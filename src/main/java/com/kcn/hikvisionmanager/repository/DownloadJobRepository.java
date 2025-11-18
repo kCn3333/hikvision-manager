@@ -89,7 +89,7 @@ public class DownloadJobRepository {
      */
     public void delete(String jobId) {
         getCache().evict(jobId);
-        log.info("Evicted download job from cache: {}", jobId);
+        log.debug("Evicted download job from cache: {}", jobId);
     }
 
     /**
