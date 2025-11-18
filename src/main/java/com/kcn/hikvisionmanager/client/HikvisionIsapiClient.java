@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import jakarta.annotation.PreDestroy;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
@@ -160,7 +161,7 @@ public class HikvisionIsapiClient {
                     throw new CameraParsingException("Failed to parse camera XML response", e);
                 }
             });
-        } catch (UnknownHostException | SocketTimeoutException e) {
+        } catch (UnknownHostException | SocketTimeoutException | ConnectException e) {
             throw new CameraOfflineException("Camera at " + cameraConfig.getIp() + " is offline or unreachable", e);
         } catch (IOException e) {
             throw new CameraRequestException("I/O error during camera GET request: " + e.getMessage(), e);

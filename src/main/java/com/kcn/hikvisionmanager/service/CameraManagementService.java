@@ -3,6 +3,7 @@ package com.kcn.hikvisionmanager.service;
 import com.kcn.hikvisionmanager.client.HikvisionIsapiClient;
 import com.kcn.hikvisionmanager.dto.xml.request.RebootRequestXml;
 import com.kcn.hikvisionmanager.dto.xml.response.RebootResponseXml;
+import com.kcn.hikvisionmanager.events.publishers.CameraRestartPublisher;
 import com.kcn.hikvisionmanager.exception.CameraOfflineException;
 import com.kcn.hikvisionmanager.exception.CameraParsingException;
 import com.kcn.hikvisionmanager.exception.CameraRequestException;
@@ -15,15 +16,24 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CameraManagementService {
 
+    private static final int RESTART_GRACE_PERIOD_SECONDS = 33;
+
     private final HikvisionIsapiClient hikvisionIsapiClient;
     private final CameraUrlBuilder urlBuilder;
+    private final CameraRestartPublisher cameraRestartPublisher;
 
     /**
-     * Sends a restart command to the camera via ISAPI.
-     * Returns true if restart was successfully initiated.
+     * Initiates camera restart and publishes event to pause cache refresh.
+     * Cache refresh will be paused for 15 seconds to avoid connection errors
+     * while camera is rebooting.
      */
     public boolean restartCamera() {
-        log.info("Initiating camera restart...");
+        // Publish event BEFORE sending restart command
+        // This ensures cache refresh is paused immediately
+        cameraRestartPublisher.publishRestartInitiated(RESTART_GRACE_PERIOD_SECONDS);
+
+        log.info("🔄 Camera restart initiated - grace period: {} seconds", RESTART_GRACE_PERIOD_SECONDS);
+
 
         try {
             // 1. Prepare request body

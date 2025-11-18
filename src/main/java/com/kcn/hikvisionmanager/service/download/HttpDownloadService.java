@@ -7,6 +7,7 @@ import com.kcn.hikvisionmanager.domain.DownloadJob;
 import com.kcn.hikvisionmanager.dto.xml.request.RecordingDownloadRequestXml;
 import com.kcn.hikvisionmanager.exception.CameraOfflineException;
 import com.kcn.hikvisionmanager.exception.CameraRequestException;
+import com.kcn.hikvisionmanager.service.CameraManagementService;
 import com.kcn.hikvisionmanager.service.CameraUrlBuilder;
 import com.kcn.hikvisionmanager.service.ProgressListener;
 import jakarta.annotation.PostConstruct;
@@ -30,6 +31,7 @@ public class HttpDownloadService {
     private final HttpDownloadClient downloadClient;
     private final CameraUrlBuilder urlBuilder;
     private final XmlMapper xmlMapper;
+    private final CameraManagementService managementService;
 
     private static final int MAX_RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_SECONDS = 5;
@@ -42,8 +44,8 @@ public class HttpDownloadService {
     /**
      * Download recording from camera via HTTP with progress tracking
      *
-     * @param job Download job with recording info
-     * @param listener Progress listener (reused from FFmpeg)
+     * @param job            Download job with recording info
+     * @param listener       Progress listener (reused from FFmpeg)
      * @param timeoutMinutes Maximum time allowed for download
      */
     public void downloadRecording(
@@ -151,11 +153,11 @@ public class HttpDownloadService {
 
     /**
      * Build XML payload for download request
-     *
+     * <p>
      * Format:
      * <?xml version='1.0' encoding='utf8'?>
      * <downloadRequest>
-     *     <playbackURI>rtsp://192.168.0.64/Streaming/tracks/101/?starttime=...&endtime=...</playbackURI>
+     * <playbackURI>rtsp://192.168.0.64/Streaming/tracks/101/?starttime=...&endtime=...</playbackURI>
      * </downloadRequest>
      */
     private String buildDownloadRequestXml(String playbackUrl) {
@@ -197,17 +199,7 @@ public class HttpDownloadService {
      * Try to restart camera (silent failure if restart fails)
      */
     private void tryRestartCamera() {
-        try {
-            log.info("🔄 Attempting camera restart...");
-//            String restartUrl = urlBuilder.buildRestartUrl();
-//
-//            // Note: Restart endpoint typically returns 200 but camera will disconnect
-//            isapiClient.executePut(restartUrl, "", String.class);
-//
-//            log.info("📡 Camera restart command sent successfully");
-
-        } catch (Exception e) {
-            log.warn("⚠️ Failed to restart camera: {} (continuing anyway)", e.getMessage());
-        }
+        log.info("⚠\uFE0F Calling restart method...");
+        managementService.restartCamera();
     }
 }

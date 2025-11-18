@@ -3,6 +3,7 @@ package com.kcn.hikvisionmanager.service;
 import com.kcn.hikvisionmanager.client.HikvisionIsapiClient;
 import com.kcn.hikvisionmanager.dto.*;
 import com.kcn.hikvisionmanager.dto.xml.response.*;
+import com.kcn.hikvisionmanager.events.model.CameraRestartInitiatedEvent;
 import com.kcn.hikvisionmanager.exception.CameraOfflineException;
 import com.kcn.hikvisionmanager.exception.CameraParsingException;
 import com.kcn.hikvisionmanager.exception.CameraRequestException;
@@ -11,8 +12,10 @@ import com.kcn.hikvisionmanager.mapper.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,6 +32,7 @@ public class CameraService {
     private final HikvisionIsapiClient hikvisionIsapiClient;
     private final CameraUrlBuilder urlBuilder;
 
+    private volatile LocalDateTime restartGraceUntil = null;
 
     @Cacheable("cameraInfo")
     public CameraInfoDTO getDeviceInfo() {
@@ -64,9 +68,30 @@ public class CameraService {
 
 
     /**
+     * Event listener that handles camera restart initialization.
+     * Sets grace period during which cache refresh attempts will be skipped.
+     *
+     * @param event Camera restart event containing grace period duration
+     */
+    @EventListener
+    public void onCameraRestart(CameraRestartInitiatedEvent event) {
+        restartGraceUntil = event.getOccurredAt().plusSeconds(event.getGracePeriodSeconds());
+        log.info("⏸️ Cache refresh paused for {} seconds due to camera restart (until: {})",
+                event.getGracePeriodSeconds(), restartGraceUntil);
+    }
+
+    /**
      * Executes camera GET request and handles known exceptions consistently.
+     * Skips HTTP calls during camera restart grace period to prevent connection errors.
      */
     private <T> T fetchData(String url, Class<T> responseType) {
+        // Check if we're in grace period after restart
+        if (isInRestartGracePeriod()) {
+            log.debug("⏳ Skipping fetch from {} - camera restart grace period active until {}",
+                    url, restartGraceUntil);
+            throw new CameraOfflineException("Camera is restarting, please wait");
+        }
+
         try {
             return hikvisionIsapiClient.executeGet(url, responseType);
         } catch (CameraOfflineException e) {
@@ -85,5 +110,29 @@ public class CameraService {
             log.error("❌ Unexpected error while fetching data from {}: {}", url, e.getMessage());
             throw new CameraRequestException("Unexpected error while communicating with camera", e);
         }
+    }
+
+    /**
+     * Checks if current time is within restart grace period.
+     * Automatically resets grace period after it expires.
+     *
+     * @return true if grace period is active, false otherwise
+     */
+    private boolean isInRestartGracePeriod() {
+        if (restartGraceUntil == null) {
+            return false;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Grace period still active
+        if (now.isBefore(restartGraceUntil)) {
+            return true;
+        }
+
+        // Grace period expired - reset and resume normal operations
+        restartGraceUntil = null;
+        log.info("✅ Cache refresh resumed - restart grace period ended");
+        return false;
     }
 }
