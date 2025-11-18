@@ -20,7 +20,7 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 - Real-time RTSP stream viewing via HLS (HTTP Live Streaming)
 - Channel switching (Main stream 101, Sub stream 102)
 - Automatic session cleanup
-- No transcoding
+- No transcoding (camera must provide H.264/H.265)
 
 ### 📼 Recordings Management
 - Browse and search camera recordings
@@ -32,6 +32,7 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 - Manual on-demand backups
 - Live backup progress tracking 
 - Detailed logs for every backup
+- Retention and cleanup policies
 
 ### 🛠️ Camera Management
 - Camera restart functionality
@@ -45,7 +46,7 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 
 ### Technology Stack
 - **Backend**: Spring Boot 3.5.7, Java 24
-- **Cache**: Caffeine Cache
+- **Cache**: Caffeine
 - **Database**: PostgreSQL 16
 - **Frontend**: Thymeleaf, Bootstrap 5.3, JavaScript
 - **Streaming**: FFmpeg, HLS.js
@@ -55,13 +56,17 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 - **ISAPI Integration**: Direct communication with Hikvision camera API
 - **HLS Streaming**: FFmpeg-based RTSP to HLS conversion
 - **Scheduled Tasks**: Automated backups and cleanup
+- **Flyway** automatic database migrations
 
 ## 🚀 Quick Start
+You can run the application either locally without Docker or via Docker Compose (recommended).
 
+## ⚙️ Local Development (without Docker)
 ### Prerequisites
-- Docker & Docker Compose
-- Hikvision IP Camera with ISAPI support
-- Network access to camera
+- JDK 24
+- Maven
+- PostgreSQL 16 installed locally
+- FFmpeg installed locally
 
 ### Installation
 
@@ -96,18 +101,35 @@ cp .env.example .env
 ```bash
 mvn clean spring-boot:run
 ```
-or just
-
-**🐳 Start with Docker Compose**
-```bash
-docker-compose up -d
-```
-
 7. **Access the application**
 ```
 http://localhost:8081
 ```
 
+## 🐳 Docker Deployment (recommended)
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/kCn3333/hikvision-manager.git
+cd hikvision-manager
+```
+2. **Configure environment variables**
+```bash
+cp .env.example .env
+# Edit .env with your camera credentials and settings
+```
+3. **Start services**
+```bash
+docker compose --env-file .env up -d
+```
+4. **Access the application**
+```
+http://localhost:8081
+```
+ logs: 
+```bash
+docker logs -f hikvision-manager
+```
 ## ⚙️ Configuration
 
 ### Environment Variables
@@ -115,22 +137,19 @@ http://localhost:8081
 Create a `.env` file in the project root:
 
 ```env
-# Camera Connection
-CAMERA_IP=192.168.X.X
-CAMERA_USERNAME=user
-CAMERA_PASSWORD=password
+# --- Database ---
+DB_PASSWORD=changeme
+
+# --- Camera ---
+CAMERA_IP=192.168.0.2
 CAMERA_PORT=80
+CAMERA_USERNAME=admin
+CAMERA_PASSWORD=password
 CAMERA_RTSP_PORT=554
-TIMEZONE=Europe/Warsaw
+TIMEZONE=UTC
 
-# Database
-DB_NAME=camera_db
-DB_USERNAME=postgres
-DB_PASSWORD=password
-
-# Application
-BACKUP_BASE_DIR=/backups
-BACKUP_TEMP_DIR=/tmp
+# --- Optional ---
+# APP_FRONTEND_URL=http://localhost:8081
 ```
 
 ### Camera Setup
@@ -168,7 +187,8 @@ hikvision-manager/
 │   │   ├── scheduler/            # Scheduled backup jobs
 │   │   └── util/                 # Utility classes
 │   └── resources/
-│       ├── db/migration/         # Flyway migration scripts
+│       ├── db/migration/         # Flyway scripts
+│       ├── static/
 │       │   ├── css/              # CSS style
 │       │   └── js/               # Java Script
 │       ├── templates/            # Thymeleaf HTML templates
@@ -181,8 +201,7 @@ hikvision-manager/
 
 ## 🔐 Security Considerations
 
-- Change default PostgreSQL password in production
-- Use strong camera passwords
+- Always change default PostgreSQL and camera passwords
 - Consider running behind reverse proxy (nginx, caddy)
 - Enable HTTPS for production deployment
 - Restrict network access to camera
