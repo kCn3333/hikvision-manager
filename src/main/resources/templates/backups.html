@@ -188,6 +188,16 @@
                                    class="form-control bg-secondary text-white border-0">
                         </div>
                         <div class="col-md-6">
+                            <label class="form-label">Time Range Strategy</label>
+                            <select id="backup-timeRangeStrategy" class="form-select bg-secondary text-white border-0">
+                                <option value="">Default (Last 24 Hours)</option>
+                                <option value="LAST_HOUR">Last Hour</option>
+                                <option value="LAST_24_HOURS">Last 24 Hours</option>
+                                <option value="PREVIOUS_DAY">Previous Day</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
                             <div class="form-check form-switch mt-4">
                                 <input class="form-check-input" type="checkbox" id="backup-enabled">
                                 <label class="form-check-label" for="backup-enabled">Enabled</label>

@@ -70,7 +70,7 @@ public class BackupConfig {
      *
      * @param baseDir Base directory for backups
      * @param defaultRetentionDays Number of days to retain backups
-     * @param scheduleCron Cron expression for backup scheduling
+     * @param defaultScheduleCron Cron expression for backup scheduling
      * @param maxRecordingsPerBackup max number of recordings for backup
      * @param defaultStrategy to determine backup time range
      * @param retryMaxAttempts Maximum retry attempts
@@ -78,12 +78,12 @@ public class BackupConfig {
      */
     public BackupConfig(Path baseDir,
                         int defaultRetentionDays,
-                        String scheduleCron, int maxRecordingsPerBackup, BackupTimeRangeStrategy defaultStrategy,
+                        String defaultScheduleCron, int maxRecordingsPerBackup, BackupTimeRangeStrategy defaultStrategy,
                         int retryMaxAttempts,
                         Duration retryDelay) {
         this.baseDir = baseDir;
         this.defaultRetentionDays = defaultRetentionDays;
-        this.defaultScheduleCron = scheduleCron;
+        this.defaultScheduleCron = defaultScheduleCron;
         this.maxRecordingsPerBackup = maxRecordingsPerBackup;
         this.defaultStrategy = defaultStrategy;
         this.retryMaxAttempts = retryMaxAttempts;

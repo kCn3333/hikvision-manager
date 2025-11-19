@@ -12,12 +12,17 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.UUID;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 @Slf4j
 public class SecurityConfig {
 
     private final String key;
+
+    @Value("${app.security.https-only:false}")
+    private boolean httpsOnly;
 
     public SecurityConfig(@Value("${remember.me.key:}") String userKey) {
         if(userKey != null && !userKey.isBlank()) {
@@ -31,7 +36,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
 
         http
                 .authorizeHttpRequests(auth -> auth
@@ -51,6 +55,7 @@ public class SecurityConfig {
                         .tokenValiditySeconds(30 * 24 * 60 * 60)
                         .rememberMeParameter("remember-me")
                         .rememberMeCookieName("hikvision-remember-me")
+                        .useSecureCookie(httpsOnly)
                 )
 
                 .logout(logout -> logout
@@ -74,12 +79,17 @@ public class SecurityConfig {
                         .maxSessionsPreventsLogin(false)
                 );
 
+
+        if (httpsOnly) {
+            log.info("🔒 HTTPS-only mode ENABLED - all requests redirected to HTTPS");
+            http.redirectToHttps(withDefaults());
+        }
+
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        //  {noop}, {bcrypt}, {pbkdf2} etc.
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }

@@ -55,7 +55,7 @@ public class BackupController {
      */
     @GetMapping("/config")
     public ResponseEntity<List<BackupConfigDTO>> getAllConfigs() {
-        log.info("🌐 API: GET /api/backups/config");
+        log.debug("🌐 API: GET /api/backups/config");
         return ResponseEntity.ok(backupService.getAllBackupConfigs());
     }
 
@@ -65,7 +65,7 @@ public class BackupController {
      */
     @GetMapping("/config/{id}")
     public ResponseEntity<BackupConfigDTO> getConfig(@PathVariable String id) {
-        log.info("🌐 API: GET /api/backups/config/{}", id);
+        log.debug("🌐 API: GET /api/backups/config/{}", id);
         return ResponseEntity.ok(backupService.getBackupConfig(id));
     }
 
@@ -78,7 +78,7 @@ public class BackupController {
             @PathVariable String id,
             @Valid @RequestBody BackupConfigDTO config) {
 
-        log.info("🌐 API: PUT /api/backups/config/{}", id);
+        log.debug("🌐 API: PUT /api/backups/config/{}", id);
         return ResponseEntity.ok(backupService.updateBackupConfig(id, config));
     }
 
@@ -88,7 +88,7 @@ public class BackupController {
      */
     @DeleteMapping("/config/{id}")
     public ResponseEntity<String> deleteConfig(@PathVariable String id) {
-        log.info("🌐 API: DELETE /api/backups/config/{}", id);
+        log.debug("🌐 API: DELETE /api/backups/config/{}", id);
         backupService.deleteBackupConfig(id);
         return ResponseEntity.ok("Backup configuration deleted successfully");
     }
@@ -114,7 +114,7 @@ public class BackupController {
     public ResponseEntity<Page<BackupJobDTO>> getAllBackupJobs(
             @PageableDefault(size = 10, sort = "startedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        log.info("🌐 API: GET /api/backups/jobs - page: {}, size: {}",
+        log.debug("🌐 API: GET /api/backups/jobs - page: {}, size: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
         Page<BackupJobDTO> jobsPage = backupService.getAllBackupJobs(pageable);
@@ -127,7 +127,7 @@ public class BackupController {
      */
     @GetMapping("/{configId}/jobs")
     public ResponseEntity<List<BackupJobDTO>> getBackupJobs(@PathVariable String id) {
-        log.info("🌐 API: GET /api/backups/jobs/{}", id);
+        log.debug("🌐 API: GET /api/backups/jobs/{}", id);
 
         return ResponseEntity.ok(backupService.getBackupJobs(id));
     }

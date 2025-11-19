@@ -39,6 +39,7 @@ class BackupManager {
       time: document.getElementById('backup-time'),
       dayOfWeek: document.getElementById('backup-dayOfWeek'),
       retention: document.getElementById('backup-retention'),
+      timeRangeStrategy: document.getElementById('backup-timeRangeStrategy'),
       enabled: document.getElementById('backup-enabled'),
       notify: document.getElementById('backup-notify'),
       dayContainer: document.getElementById('dayOfWeek-container'),
@@ -241,6 +242,7 @@ class BackupManager {
       this.form.time.value = config.time || '';
       this.form.dayOfWeek.value = config.dayOfWeek || 'MONDAY';
       this.form.retention.value = config.retentionDays;
+      this.form.timeRangeStrategy.value = config.timeRangeStrategy || "";
       this.form.enabled.checked = config.enabled;
       this.form.notify.checked = config.notifyOnComplete;
 
@@ -259,6 +261,7 @@ class BackupManager {
       this.form.time.value = '02:00';
       this.form.dayOfWeek.value = 'MONDAY';
       this.form.retention.value = 7;
+      this.form.timeRangeStrategy.value = "";
       this.form.enabled.checked = true;
       this.form.notify.checked = false;
       this.form.dayContainer.style.display = 'none';
@@ -287,6 +290,7 @@ class BackupManager {
       dayOfWeek: this.form.scheduleType.value === 'WEEKLY'
         ? this.form.dayOfWeek.value
         : null,
+      timeRangeStrategy: this.form.timeRangeStrategy.value || null,
     };
 
     // Validate
