@@ -79,8 +79,8 @@ class LiveStreamPlayer {
   async waitForStreamReady(playlistUrl, maxAttempts = 12) {
     console.log('⏳ Waiting for stream files...');
 
-    // Poczekaj 3 sekundy przed pierwszą próbą (FFmpeg potrzebuje czasu)
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Poczekaj 5 sekundy przed pierwszą próbą (FFmpeg potrzebuje czasu)
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     for (let i = 0; i < maxAttempts; i++) {
       try {
@@ -94,7 +94,7 @@ class LiveStreamPlayer {
           if (text.includes('#EXTM3U') && text.includes('.ts')) {
             console.log(`✅ Stream ready after ${i + 1} attempts`);
             // Poczekaj jeszcze chwilę na pewność
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 1000));
             return;
           }
         }
@@ -102,11 +102,11 @@ class LiveStreamPlayer {
         // Ignoruj błędy - czekamy dalej
       }
 
-      // Zwiększ odstęp między próbami
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // odstęp między próbami
+      await new Promise(resolve => setTimeout(resolve, 2500));
     }
 
-    throw new Error('Stream not ready after 18 seconds');
+    throw new Error('Stream not ready after 45 seconds');
   }
 
   async stopStream() {

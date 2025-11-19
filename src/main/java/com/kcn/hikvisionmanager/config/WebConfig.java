@@ -32,6 +32,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .maxAge(3600);
 
-        log.info("✅ Global CORS configured for: {}", frontendUrl);
+        log.info("✅ CORS configured for: {}", frontendUrl);
     }
 }

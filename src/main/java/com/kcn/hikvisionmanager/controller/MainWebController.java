@@ -1,55 +1,72 @@
 package com.kcn.hikvisionmanager.controller;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+import com.kcn.hikvisionmanager.config.CameraConfig;
+import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.UUID;
+import java.security.Principal;
+
 
 @Controller
+@Slf4j
 public class MainWebController {
 
+    private final int mainTrackId;
+    private final int subTrackId;
+
+    public MainWebController(CameraConfig config) {
+        this.mainTrackId = config.getTrackMain();
+        this.subTrackId = config.getTrackSub();
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
     @GetMapping("/")
-    public String index(HttpServletResponse response, Model model) {
+    public String index(HttpSession httpSession, Principal principal, Model model) {
+        String sessionId = httpSession.getId();
+        String username = (principal != null) ? principal.getName() : "Guest";
 
-        // sessionId
-        String sessionId = UUID.randomUUID().toString();
-
-        Cookie cookie = new Cookie("sessionId", sessionId);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(3600); // 1 h
-
-        response.addCookie(cookie);
+        log.info("📍 User {} accessed index page, sessionId: {}", username, sessionId);
 
         model.addAttribute("sessionId", sessionId);
+        model.addAttribute("username", username);
+        model.addAttribute("mainTrack", mainTrackId);
+        model.addAttribute("subTrack", subTrackId);
         model.addAttribute("currentPath", "/index");
 
         return "index";
     }
 
     @GetMapping("/recordings")
-    public String recordings(Model model) {
+    public String recordings(Principal principal, Model model) {
+        model.addAttribute("username", principal != null ? principal.getName() : "Guest");
         model.addAttribute("currentPath", "/recordings");
         return "recordings";
     }
 
     @GetMapping("/backups")
-    public String backups(Model model) {
+    public String backups(Principal principal, Model model) {
+        model.addAttribute("username", principal != null ? principal.getName() : "Guest");
         model.addAttribute("currentPath", "/backups");
         return "backups";
     }
 
     @GetMapping("/info")
-    public String info(Model model) {
+    public String info(Principal principal, Model model) {
+        model.addAttribute("username", principal != null ? principal.getName() : "Guest");
         model.addAttribute("currentPath", "/info");
         return "info";
     }
 
     @GetMapping("/backup-history")
-    public String backupHistory(Model model) {
+    public String backupHistory(Principal principal, Model model) {
+        model.addAttribute("username", principal != null ? principal.getName() : "Guest");
         model.addAttribute("currentPath", "/backup-history");
         return "backup-history";
     }

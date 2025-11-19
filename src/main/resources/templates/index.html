@@ -55,8 +55,8 @@
                             </div>
                             <div class="col-auto">
                                 <select id="channelSelect" class="form-select">
-                                    <option value="101">Main Stream (101)</option>
-                                    <option value="102">Sub Stream (102)</option>
+                                    <option th:value="${mainTrack}">Main Stream ([[${mainTrack}]])</option>
+                                    <option th:value="${subTrack}">Sub Stream ([[${subTrack}]])</option>
                                 </select>
                             </div>
 

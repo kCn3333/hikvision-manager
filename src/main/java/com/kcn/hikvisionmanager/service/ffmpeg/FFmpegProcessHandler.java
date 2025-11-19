@@ -43,7 +43,7 @@ public class FFmpegProcessHandler {
         Files.createDirectories(outputDir);
         log.debug("✅ Clean directory ready: {}", Files.exists(outputDir));
 
-        log.info("▶️ Starting FFmpeg stream process in: {}", outputDir);
+        log.debug("▶️ Starting FFmpeg stream process in: {}", outputDir);
 
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.redirectErrorStream(false); // stderr musi być czytane, inaczej FFmpeg może zawisnąć
@@ -64,7 +64,7 @@ public class FFmpegProcessHandler {
      * Czytanie stderr FFmpeg – nie parsujemy, tylko odciążamy bufor.
      */
     private void consumeStderr(Process process, Path outputDir) {
-        log.info("📊 Starting to read FFmpeg stderr...");
+        log.debug("📊 Starting to read FFmpeg stderr...");
 
         try (BufferedReader reader =
                      new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
@@ -83,7 +83,7 @@ public class FFmpegProcessHandler {
                     if (line.contains("No such file or directory")) {
                         log.trace("⚠️ FFmpeg expected error during shutdown: {}", line);
                     } else {
-                        log.error("❌ FFmpeg ERROR: {}", line);
+                        log.trace("❌ FFmpeg ERROR: {}", line);
                     }
                 }
                 else if (line.contains("frame=")) {
@@ -114,7 +114,7 @@ public class FFmpegProcessHandler {
         Process process = running.process();
 
         try {
-            log.info("⛔ Stopping FFmpeg streaming process…");
+            log.debug("⛔ Stopping FFmpeg streaming process…");
 
             process.destroy();
 

@@ -98,13 +98,13 @@ public class CameraStreamService {
         }
 
         try {
-            log.info("⛔ Stopping HLS stream for session {}", sessionId);
+            log.debug("⛔ Stopping HLS stream for session {}", sessionId);
 
             processHandler.stopStreaming(stream.runningProcess());
             cleanupHlsFiles(stream.outputDir());
             liveStreamCache.invalidate(sessionId);
 
-            log.info("✔️ HLS stream stopped for session {}", sessionId);
+            log.debug("✔️ HLS stream stopped for session {}", sessionId);
 
         } catch (Exception e) {
             log.warn("❌ Error stopping stream session={} – forcing cleanup", sessionId);

@@ -1,11 +1,13 @@
 package com.kcn.hikvisionmanager.mapper;
 
+import com.kcn.hikvisionmanager.config.CameraConfig;
 import com.kcn.hikvisionmanager.dto.RecordingItemDTO;
 import com.kcn.hikvisionmanager.dto.RecordingSearchRequestDTO;
 import com.kcn.hikvisionmanager.dto.RecordingSearchResultDTO;
 import com.kcn.hikvisionmanager.dto.xml.request.RecordingSearchRequestXml;
 import com.kcn.hikvisionmanager.dto.xml.response.RecordingSearchResponseXml;
 import com.kcn.hikvisionmanager.util.TimeUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,13 +22,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class RecordingSearchMapper {
 
-    private final int defaultTrackId;
-
-    public RecordingSearchMapper(@Value("${camera.default.track-id}") int defaultTrackId) {
-        this.defaultTrackId = defaultTrackId;
-    }
+    private final CameraConfig config;
 
     public RecordingSearchRequestXml toXmlRequest(RecordingSearchRequestDTO request) {
         RecordingSearchRequestXml xmlRequest = new RecordingSearchRequestXml();
@@ -38,7 +37,7 @@ public class RecordingSearchMapper {
 
         // Track ID
         RecordingSearchRequestXml.TrackIdList trackIdList = new RecordingSearchRequestXml.TrackIdList();
-        trackIdList.setTrackId(String.valueOf(defaultTrackId));
+        trackIdList.setTrackId(String.valueOf(config.getTrackMain()));
         xmlRequest.setTrackIdList(trackIdList);
 
         // Time span (converted to camera UTC)

@@ -78,6 +78,15 @@
                         <i class="bi bi-info-circle me-1"></i> Info
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="document.getElementById('logout-form').submit(); return false;">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        <span class="text-muted" th:if="${username != null}">
+                            (<span th:text="${username}"></span>)
+                        </span>
+                    </a>
+                </li>
+
             </ul>
         </div>
     </div>
@@ -106,5 +115,6 @@
     </div>
 </footer>
 
+<form id="logout-form" th:action="@{/logout}" method="post" style="display: none;"></form>
 </body>
 </html>

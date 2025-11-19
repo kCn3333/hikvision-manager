@@ -15,16 +15,18 @@ public class CameraConfig {
     private final String password;
     private final int rtsp;
     private final String timezone;
-    private final int trackId;
+    private final int trackMain;
+    private final int trackSub;
 
-    public CameraConfig(String ip, int port, String username, String password, int rtsp, String timezone, int trackId) {
+    public CameraConfig(String ip, int port, String username, String password, int rtsp, String timezone, int trackMain, int trackSub) {
         this.ip = ip;
         this.port = port;
         this.username = username;
         this.password = password;
         this.rtsp = rtsp;
         this.timezone = timezone;
-        this.trackId = trackId;
+        this.trackMain = trackMain;
+        this.trackSub = trackSub;
         log.info("✅ CameraConfig initialized");
     }
 }
