@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.kcn.hikvisionmanager.client.HttpDownloadClient;
 import com.kcn.hikvisionmanager.domain.DownloadJob;
 import com.kcn.hikvisionmanager.dto.xml.request.RecordingDownloadRequestXml;
+import com.kcn.hikvisionmanager.events.model.CameraRestartInitiatedEvent;
 import com.kcn.hikvisionmanager.exception.CameraOfflineException;
 import com.kcn.hikvisionmanager.exception.CameraRequestException;
 import com.kcn.hikvisionmanager.service.CameraManagementService;
@@ -13,16 +14,17 @@ import com.kcn.hikvisionmanager.service.ProgressListener;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 /**
  * Service for downloading recordings via HTTP (ISAPI ContentMgmt/download)
- *
- **/
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,15 +36,34 @@ public class HttpDownloadService {
     private final CameraManagementService managementService;
 
     private static final int MAX_RETRY_ATTEMPTS = 3;
-    private static final int RETRY_DELAY_SECONDS = 5;
+    private static final int RETRY_DELAY_SECONDS = 12;
+
+    // Grace period tracking for camera restart (same as CameraService)
+    private volatile LocalDateTime restartGraceUntil = null;
 
     @PostConstruct
     public void init() {
-        log.info("✅ HttpDownloadClient initialized (ISAPI HTTP download)");
+        log.info("✅ HttpDownloadService initialized (ISAPI HTTP download)");
     }
 
     /**
-     * Download recording from camera via HTTP with progress tracking
+     * Event listener that handles camera restart initialization.
+     * Sets grace period during which download attempts will wait.
+     *
+     * @param event Camera restart event containing grace period duration
+     */
+    @EventListener
+    public void onCameraRestart(CameraRestartInitiatedEvent event) {
+        restartGraceUntil = event.getOccurredAt().plusSeconds(event.getGracePeriodSeconds());
+        log.info("⏸️ [{}] Download operations paused for {} seconds due to camera restart (until: {})",
+                Thread.currentThread().getName(),
+                event.getGracePeriodSeconds(),
+                restartGraceUntil);
+    }
+
+    /**
+     * Download recording from camera via HTTP with progress tracking.
+     * Automatically waits during camera restart grace period.
      *
      * @param job            Download job with recording info
      * @param listener       Progress listener (reused from FFmpeg)
@@ -67,6 +88,9 @@ public class HttpDownloadService {
                     Thread.sleep(RETRY_DELAY_SECONDS * 1000L);
                 }
 
+                // CRITICAL: Wait if camera is restarting
+                waitIfCameraRestarting();
+
                 executeDownload(job, listener, timeoutMinutes);
 
                 // Success - exit retry loop
@@ -82,12 +106,11 @@ public class HttpDownloadService {
                     log.warn("🔄 Last retry attempt - restarting camera...");
                     tryRestartCamera();
 
-                    // Wait for camera to come back online
+                    // Wait for restart grace period to complete
                     try {
-                        Thread.sleep(30000); // 30s wait after restart
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        break;
+                        waitIfCameraRestarting();
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
                     }
                 }
 
@@ -116,6 +139,40 @@ public class HttpDownloadService {
     }
 
     /**
+     * Waits if camera is currently in restart grace period.
+     * Blocks the calling thread until grace period expires.
+     *
+     * @throws InterruptedException if thread is interrupted while waiting
+     */
+    private void waitIfCameraRestarting() throws InterruptedException {
+        if (restartGraceUntil == null) {
+            return; // No restart in progress
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Check if grace period is still active
+        if (now.isBefore(restartGraceUntil)) {
+            long secondsToWait = Duration.between(now, restartGraceUntil).getSeconds();
+            log.info("⏳ [{}] Camera restart in progress, waiting {} seconds until {}",
+                    Thread.currentThread().getName(),
+                    secondsToWait,
+                    restartGraceUntil);
+
+            // Sleep until grace period ends
+            Thread.sleep(secondsToWait * 1000L);
+
+            // Reset grace period after waiting
+            restartGraceUntil = null;
+            log.info("✅ [{}] Camera restart grace period ended, resuming download operations",
+                    Thread.currentThread().getName());
+        } else {
+            // Grace period already expired
+            restartGraceUntil = null;
+        }
+    }
+
+    /**
      * Execute single download attempt
      */
     private void executeDownload(
@@ -139,7 +196,6 @@ public class HttpDownloadService {
         final long[] lastUpdateTime = {startTimeMs};
         final long[] lastDownloadedBytes = {0};
 
-
         // Execute HTTP download with streaming
         downloadClient.executeDownloadStream(
                 downloadUrl,
@@ -149,7 +205,6 @@ public class HttpDownloadService {
                 timeoutMinutes
         );
     }
-
 
     /**
      * Build XML payload for download request
@@ -178,7 +233,6 @@ public class HttpDownloadService {
                 "</downloadRequest>";
     }
 
-
     /**
      * Format duration in human-readable format (e.g., "2m 30s")
      */
@@ -194,12 +248,25 @@ public class HttpDownloadService {
         }
     }
 
-
     /**
-     * Try to restart camera (silent failure if restart fails)
+     * Try to restart camera and wait for grace period.
+     * This ensures the camera has time to fully restart before retry attempts.
      */
     private void tryRestartCamera() {
-        log.info("⚠\uFE0F Calling restart method...");
-        managementService.restartCamera();
+        try {
+            log.info("⚠️ Initiating camera restart...");
+            managementService.restartCamera();
+
+            // Wait for the restart grace period to be established and complete
+            // Small delay to ensure event is processed
+            Thread.sleep(800);
+
+            // Now wait for the full grace period
+            waitIfCameraRestarting();
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("⚠️ Interrupted while waiting for camera restart");
+        }
     }
 }
