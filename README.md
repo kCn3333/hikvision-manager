@@ -6,8 +6,7 @@
 <p align="center">
   <a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/build.yml">
     <img src="https://github.com/kCn3333/hikvision-manager/actions/workflows/build.yml/badge.svg" />
-  </a>
-  <a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml">
+  </a><a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml">
     <img src="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml/badge.svg" />
   </a>
 </p>
@@ -169,6 +168,7 @@ TIMEZONE=UTC
 <a href="https://hub.docker.com/r/kcn333/hikvision-manager">
   <img src="https://img.shields.io/docker/pulls/kcn333/hikvision-manager?logo=docker">
 </a>
+
 A prebuilt Docker image is available here:
 https://hub.docker.com/r/kcn333/hikvision-manager
 
