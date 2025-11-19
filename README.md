@@ -1,5 +1,16 @@
 
-<div align="center">  <img src="images/logo.png"> </div>
+<div align="center">
+  <img src="images/logo.png" />
+</div>
+
+<p align="center">
+  <a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/build.yml">
+    <img src="https://github.com/kCn3333/hikvision-manager/actions/workflows/build.yml/badge.svg" />
+  </a>
+  <a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml">
+    <img src="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml/badge.svg" />
+  </a>
+</p>
 
 Hikvision Manager is a Spring Boot application designed to manage Hikvision Cameras, execute backup jobs, store backup history, and provide a UI for browsing and downloading recordings.
 It integrates with Hikvision ISAPI endpoints, schedules recording backups, stores metadata in PostgreSQL, and exposes a management dashboard. Also provides HTTP Live Streaming by HLS and FFmpeg.
@@ -137,20 +148,36 @@ docker logs -f hikvision-manager
 Create a `.env` file in the project root:
 
 ```env
+# --- Credentials ---
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD={noop}your-secure-password
+
 # --- Database ---
 DB_PASSWORD=changeme
 
 # --- Camera ---
-CAMERA_IP=192.168.0.2
+CAMERA_IP=192.168.X.X
 CAMERA_PORT=80
 CAMERA_USERNAME=admin
 CAMERA_PASSWORD=password
 CAMERA_RTSP_PORT=554
 TIMEZONE=UTC
-
-# --- Optional ---
-# APP_FRONTEND_URL=http://localhost:8081
 ```
+
+## 🔒 HTTPS Configuration
+
+By default, the application runs in HTTP mode. To enable HTTPS:
+
+Use Nginx/Traefik for SSL termination:
+
+1. Set `HTTPS_ONLY=true` in `.env`
+2. Configure your reverse proxy (see `nginx-reverse-proxy.conf.example`)
+3. Proxy requests to `http://localhost:8081`
+
+The application will automatically:
+- Set secure cookies
+- Enforce HTTPS for all requests
+- Set proper CORS headers
 
 ### Camera Setup
 
