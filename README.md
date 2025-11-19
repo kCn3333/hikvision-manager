@@ -164,6 +164,23 @@ CAMERA_RTSP_PORT=554
 TIMEZONE=UTC
 ```
 
+## 🐳 Docker Image Available on Docker Hub
+
+<a href="https://hub.docker.com/r/kcn333/hikvision-manager">
+  <img src="https://img.shields.io/docker/pulls/kcn333/hikvision-manager?logo=docker">
+</a>
+A prebuilt Docker image is available here:
+https://hub.docker.com/r/kcn333/hikvision-manager
+
+Pull the image directly without cloning the repository:
+```bash
+docker pull kcn333/hikvision-manager:latest
+docker run \
+-p 8081:8081 \
+--env-file .env \
+kcn333/hikvision-manager:latest
+```
+
 ## 🔒 HTTPS Configuration
 
 By default, the application runs in HTTP mode. To enable HTTPS:
@@ -179,7 +196,7 @@ The application will automatically:
 - Enforce HTTPS for all requests
 - Set proper CORS headers
 
-### Camera Setup
+## 🎥 Camera Setup
 
 Ensure your Hikvision camera has:
 - ISAPI enabled (usually enabled by default)
