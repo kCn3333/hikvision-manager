@@ -1,3 +1,6 @@
+### 🚧 Beta Notice
+This application is currently in **beta testing**. It may contain bugs and its features are subject to change. All feedback and suggestions are welcome!
+***
 
 <div align="center">
   <img src="images/logo.png" />
