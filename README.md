@@ -27,6 +27,10 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 ![Javascript](https://img.shields.io/badge/JavaScript-555555?logo=javascript&logoColor=3fb950)
 ![Docker](https://img.shields.io/badge/Docker_Ready-2496ED?logo=docker&logoColor=fff)
 
+## 📚 Documentation
+- [API Reference](docs/api.md)
+- [Screenshots](docs/screenshots.md)
+
 ## ✨ Features
 
 ### 🎥 Live Preview
