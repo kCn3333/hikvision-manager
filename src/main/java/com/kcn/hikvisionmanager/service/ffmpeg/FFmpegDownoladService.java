@@ -1,16 +1,20 @@
 package com.kcn.hikvisionmanager.service.ffmpeg;
 
+import com.kcn.hikvisionmanager.events.model.CameraRestartInitiatedEvent;
 import com.kcn.hikvisionmanager.service.ProgressListener;
 import com.kcn.hikvisionmanager.util.ProgressCalculator;
 import com.kcn.hikvisionmanager.domain.DownloadJob;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.regex.Matcher;
@@ -29,6 +33,9 @@ public class FFmpegDownoladService {
 
     private final FFmpegCommandBuilder commandBuilder;
 
+    // Grace period tracking for camera restart (same as other services)
+    private volatile LocalDateTime restartGraceUntil = null;
+
     @PostConstruct
     public void checkFFmpegAvailability() {
         String version = getFFmpegVersion();
@@ -40,7 +47,23 @@ public class FFmpegDownoladService {
     }
 
     /**
-     * Download recording from RTSP stream using FFmpeg
+     * Event listener that handles camera restart initialization.
+     * Sets grace period during which download attempts will wait.
+     *
+     * @param event Camera restart event containing grace period duration
+     */
+    @EventListener
+    public void onCameraRestart(CameraRestartInitiatedEvent event) {
+        restartGraceUntil = event.getOccurredAt().plusSeconds(event.getGracePeriodSeconds());
+        log.info("⏸️ [{}] FFmpeg operations paused for {} seconds due to camera restart (until: {})",
+                Thread.currentThread().getName(),
+                event.getGracePeriodSeconds(),
+                restartGraceUntil);
+    }
+
+    /**
+     * Download recording from RTSP stream using FFmpeg.
+     * Automatically waits during camera restart grace period.
      *
      * @param job Download job with recording info
      * @param listener Progress listener
@@ -51,6 +74,9 @@ public class FFmpegDownoladService {
         Process process = null;
 
         try {
+            // CRITICAL: Wait if camera is restarting
+            waitIfCameraRestarting();
+
             // Ensure output directory exists
             Files.createDirectories(job.getFilePath().getParent());
 
@@ -110,6 +136,15 @@ public class FFmpegDownoladService {
                 }
             }
 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("⚠️ FFmpeg download interrupted during camera restart wait");
+            listener.onError("Download interrupted during camera restart");
+
+            if (process != null && process.isAlive()) {
+                process.destroyForcibly();
+            }
+
         } catch (Exception e) {
             log.error("❌ FFmpeg execution failed: {}", e.getMessage(), e);
             listener.onError("FFmpeg execution failed: " + e.getMessage());
@@ -117,6 +152,40 @@ public class FFmpegDownoladService {
             if (process != null && process.isAlive()) {
                 process.destroyForcibly();
             }
+        }
+    }
+
+    /**
+     * Waits if camera is currently in restart grace period.
+     * Blocks the calling thread until grace period expires.
+     *
+     * @throws InterruptedException if thread is interrupted while waiting
+     */
+    private void waitIfCameraRestarting() throws InterruptedException {
+        if (restartGraceUntil == null) {
+            return; // No restart in progress
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Check if grace period is still active
+        if (now.isBefore(restartGraceUntil)) {
+            long secondsToWait = Duration.between(now, restartGraceUntil).getSeconds();
+            log.info("⏳ [{}] Camera restart in progress, FFmpeg waiting {} seconds until {}",
+                    Thread.currentThread().getName(),
+                    secondsToWait,
+                    restartGraceUntil);
+
+            // Sleep until grace period ends
+            Thread.sleep(secondsToWait * 1000L);
+
+            // Reset grace period after waiting
+            restartGraceUntil = null;
+            log.info("✅ [{}] Camera restart grace period ended, resuming FFmpeg operations",
+                    Thread.currentThread().getName());
+        } else {
+            // Grace period already expired
+            restartGraceUntil = null;
         }
     }
 
