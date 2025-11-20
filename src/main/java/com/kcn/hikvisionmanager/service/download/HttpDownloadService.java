@@ -259,10 +259,12 @@ public class HttpDownloadService {
 
             // Wait for the restart grace period to be established and complete
             // Small delay to ensure event is processed
-            Thread.sleep(800);
+            Thread.sleep(1000);
 
             // Now wait for the full grace period
             waitIfCameraRestarting();
+            log.info("⏳ Extra wait for camera stabilization (15s)...");
+            Thread.sleep(15_000);
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
