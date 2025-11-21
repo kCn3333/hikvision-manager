@@ -42,6 +42,9 @@ COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
 # Switch to non-root user
 USER spring
 
+# Create application directories with proper permissions
+RUN mkdir -p logs tmp/stream tmp/recordings backups
+
 # Environment variables
 ENV SPRING_PROFILES_ACTIVE=prod
 
