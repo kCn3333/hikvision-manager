@@ -17,7 +17,7 @@ RUN ./mvnw -q dependency:go-offline
 
 # Copy source code and build
 COPY src ./src
-RUN ./mvnw -q -DskipTests clean package
+RUN ./mvnw clean package -DskipTests -U --no-transfer-progress
 
 # ===========================
 # RUNTIME STAGE
@@ -38,6 +38,8 @@ WORKDIR /app
 
 # Copy JAR from build stage
 COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
+# Copy migration files explicitly (fallback)
+COPY --from=build --chown=spring:spring /app/src/main/resources/db/migration /app/db/migration
 
 # Switch to non-root user
 USER spring
