@@ -73,8 +73,12 @@ public class BackupExecutor {
                     backupDateRange.start(), backupDateRange.end(), strategy);
 
             // Validate backup directory
-            String backupDir = buildBackupDirectory(config.getBackupPath(), backupDateRange.start());
+            String backupDir = buildBackupDirectory(backupConfig.getBaseDir().toString(), backupDateRange.start());
             validateBackupDirectory(backupDir);
+
+            // Update config's backupPath for consistency
+            config.setBackupPath(backupConfig.getBaseDir().toString());
+            backupConfigurationRepository.save(config);
 
             // Create backup job in DB
             BackupJobEntity backupJob = createBackupJob(
