@@ -55,7 +55,7 @@ public class HttpDownloadService {
     @EventListener
     public void onCameraRestart(CameraRestartInitiatedEvent event) {
         restartGraceUntil = event.getOccurredAt().plusSeconds(event.getGracePeriodSeconds());
-        log.info("⏸️ [{}] Download operations paused for {} seconds due to camera restart (until: {})",
+        log.debug("⏸️ [{}] Download operations paused for {} seconds due to camera restart (until: {})",
                 Thread.currentThread().getName(),
                 event.getGracePeriodSeconds(),
                 restartGraceUntil);
@@ -104,14 +104,7 @@ public class HttpDownloadService {
                 // On last attempt, try camera restart
                 if (attempt == MAX_RETRY_ATTEMPTS - 1) {
                     log.warn("🔄 Last retry attempt - restarting camera...");
-                    tryRestartCamera();
-
-                    // Wait for restart grace period to complete
-                    try {
-                        waitIfCameraRestarting();
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
+                    tryRestartCamera(); // This now includes waiting internally
                 }
 
             } catch (InterruptedException e) {
@@ -259,12 +252,10 @@ public class HttpDownloadService {
 
             // Wait for the restart grace period to be established and complete
             // Small delay to ensure event is processed
-            Thread.sleep(1000);
+            Thread.sleep(1500);
 
             // Now wait for the full grace period
             waitIfCameraRestarting();
-            log.info("⏳ Extra wait for camera stabilization (15s)...");
-            Thread.sleep(15_000);
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

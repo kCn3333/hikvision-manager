@@ -76,7 +76,7 @@ public class CameraService {
     @EventListener
     public void onCameraRestart(CameraRestartInitiatedEvent event) {
         restartGraceUntil = event.getOccurredAt().plusSeconds(event.getGracePeriodSeconds());
-        log.info("⏸️ Cache refresh paused for {} seconds due to camera restart (until: {})",
+        log.debug("⏸️ Cache refresh paused for {} seconds due to camera restart (until: {})",
                 event.getGracePeriodSeconds(), restartGraceUntil);
     }
 

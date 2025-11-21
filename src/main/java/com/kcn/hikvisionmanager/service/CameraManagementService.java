@@ -11,12 +11,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import static com.kcn.hikvisionmanager.client.HttpClientConfig.CAMERA_RESTART_GRACE_SECONDS;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CameraManagementService {
 
-    private static final int RESTART_GRACE_PERIOD_SECONDS = 33;
 
     private final HikvisionIsapiClient hikvisionIsapiClient;
     private final CameraUrlBuilder urlBuilder;
@@ -30,9 +31,9 @@ public class CameraManagementService {
     public boolean restartCamera() {
         // Publish event BEFORE sending restart command
         // This ensures cache refresh is paused immediately
-        cameraRestartPublisher.publishRestartInitiated(RESTART_GRACE_PERIOD_SECONDS);
+        cameraRestartPublisher.publishRestartInitiated(CAMERA_RESTART_GRACE_SECONDS);
 
-        log.info("🔄 Camera restart initiated - grace period: {} seconds", RESTART_GRACE_PERIOD_SECONDS);
+        log.info("🔄 Camera restart initiated - grace period: {} seconds", CAMERA_RESTART_GRACE_SECONDS);
 
 
         try {

@@ -210,8 +210,6 @@ public class BatchDownloadService {
             publisher.publishBackupFailed(batch.getBatchId());
         }
 
-        publisher.publishBackupCompleted(batch.getBatchId());
-
         batchRepository.save(batch);
 
         log.debug("🎉 Batch finalized: {} - {} ({}/{} completed)",

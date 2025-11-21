@@ -81,7 +81,7 @@ public class RecordingDownloadController {
     public ResponseEntity<Map<String, String>> startDownload(
             @Valid @RequestBody List<RecordingItemDTO> recordings) {
 
-        log.info("🌐 API: POST /api/recordings/download/start/batch - {} recordings",
+        log.debug("🌐 API: POST /api/recordings/download/start/batch - {} recordings",
                 recordings.size());
 
         try {

@@ -28,7 +28,7 @@ public class RecordingService {
      * Searches for recordings within the given time range and pagination settings.
      */
     public RecordingSearchResultDTO searchRecordings(RecordingSearchRequestDTO request) {
-        log.info("🔍 Searching recordings from {} to {}, page {}",
+        log.debug("🔍 Searching recordings from {} to {}, page {}",
                 request.getStartTime(), request.getEndTime(), request.getPage());
 
         try {
@@ -49,7 +49,7 @@ public class RecordingService {
             // 3️⃣ Map XML → DTO
             RecordingSearchResultDTO result = recordingSearchMapper.toSearchResult(xmlResponse, request);
 
-            log.info("✅ Found {} recordings (hasMore={})",
+            log.debug("✅ Found {} recordings (hasMore={})",
                     result.getTotalMatches(),
                     result.isHasMore());
             return result;

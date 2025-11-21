@@ -55,7 +55,7 @@ public class FFmpegDownoladService {
     @EventListener
     public void onCameraRestart(CameraRestartInitiatedEvent event) {
         restartGraceUntil = event.getOccurredAt().plusSeconds(event.getGracePeriodSeconds());
-        log.info("⏸️ [{}] FFmpeg operations paused for {} seconds due to camera restart (until: {})",
+        log.debug("⏸️ [{}] FFmpeg operations paused for {} seconds due to camera restart (until: {})",
                 Thread.currentThread().getName(),
                 event.getGracePeriodSeconds(),
                 restartGraceUntil);

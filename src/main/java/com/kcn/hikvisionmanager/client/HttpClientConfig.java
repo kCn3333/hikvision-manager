@@ -20,6 +20,9 @@ public final class HttpClientConfig {
     public static final int RETRY_ATTEMPTS = 3;
     public static final int RETRY_INTERVAL_SECONDS = 1;
 
+    // Camera restart grace period
+    public static final int CAMERA_RESTART_GRACE_SECONDS = 55;
+
     // Download streaming buffer sizes
     public static final int STREAM_BUFFER_SIZE = 64 * 1024;      // 64KB for buffered streams
     public static final int CHUNK_SIZE = 8192;                   // 8KB for read/write chunks

@@ -3,6 +3,7 @@ package com.kcn.hikvisionmanager.service.download;
 import com.kcn.hikvisionmanager.config.DownloadConfig;
 import com.kcn.hikvisionmanager.domain.DownloadJob;
 import com.kcn.hikvisionmanager.domain.DownloadStatus;
+import com.kcn.hikvisionmanager.events.model.CameraRestartInitiatedEvent;
 import com.kcn.hikvisionmanager.events.publishers.RecordingDownloadPublisher;
 import com.kcn.hikvisionmanager.repository.DownloadJobRepository;
 import com.kcn.hikvisionmanager.service.ProgressListener;
@@ -11,8 +12,10 @@ import com.kcn.hikvisionmanager.service.ffmpeg.FFmpegProgressListener;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.Executor;
 
@@ -35,6 +38,9 @@ public class DownloadJobQueue {
     @Qualifier("cameraTaskExecutor")
     private final Executor taskExecutor;
 
+    // Grace period tracking for camera restart
+    private volatile LocalDateTime restartGraceUntil = null;
+
     public DownloadJobQueue(FFmpegDownoladService ffmpegDownloadService, CameraDownloadSemaphore cameraSemaphore, DownloadJobRepository repository, HttpDownloadService httpDownloadService, DownloadConfig config, RecordingDownloadPublisher publisher, @Qualifier("cameraTaskExecutor") Executor taskExecutor) {
         this.ffmpegDownloadService = ffmpegDownloadService;
         this.cameraSemaphore = cameraSemaphore;
@@ -51,6 +57,19 @@ public class DownloadJobQueue {
         log.info("✅ Download job queue initialized using {} method", method);
     }
 
+    /**
+     * Event listener for camera restart.
+     * Blocks the entire download queue during grace period.
+     *
+     * @param event Camera restart event containing grace period duration
+     */
+    @EventListener
+    public void onCameraRestart(CameraRestartInitiatedEvent event) {
+        restartGraceUntil = event.getOccurredAt().plusSeconds(event.getGracePeriodSeconds());
+        log.info("⏸️ [DownloadJobQueue] All downloads paused for {} seconds due to camera restart (until: {})",
+                event.getGracePeriodSeconds(),
+                restartGraceUntil);
+    }
 
     /**
      * Submit download job to queue
@@ -63,9 +82,12 @@ public class DownloadJobQueue {
 
     /**
      * Execute download job (runs in separate thread)
+     * Waits for camera restart grace period before acquiring semaphore.
      */
     private void executeDownload(DownloadJob job) {
         try {
+            // This blocks entire queue and prevents new downloads during restart
+            waitIfCameraRestarting();
             // Wait for camera to be available
             cameraSemaphore.acquire();
 
@@ -115,6 +137,41 @@ public class DownloadJobQueue {
         } finally {
             // Always release semaphore
             cameraSemaphore.release();
+        }
+    }
+
+    /**
+     * Wait if camera is currently in restart grace period.
+     * Blocks the calling thread until grace period expires.
+     * This prevents new downloads from starting during camera restart.
+     *
+     * @throws InterruptedException if thread is interrupted while waiting
+     */
+    private void waitIfCameraRestarting() throws InterruptedException {
+        if (restartGraceUntil == null) {
+            return; // No restart in progress
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Check if grace period is still active
+        if (now.isBefore(restartGraceUntil)) {
+            long secondsToWait = Duration.between(now, restartGraceUntil).getSeconds();
+            log.info("⏳ [{}] Download queue paused, waiting {} seconds for camera restart (until: {})",
+                    Thread.currentThread().getName(),
+                    secondsToWait,
+                    restartGraceUntil);
+
+            // Sleep until grace period ends
+            Thread.sleep(secondsToWait * 1000L);
+
+            // Reset grace period after waiting
+            restartGraceUntil = null;
+            log.info("✅ [{}] Download queue resumed after camera restart grace period",
+                    Thread.currentThread().getName());
+        } else {
+            // Grace period already expired
+            restartGraceUntil = null;
         }
     }
 

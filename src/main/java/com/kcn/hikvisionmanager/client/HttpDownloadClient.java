@@ -1,6 +1,7 @@
 package com.kcn.hikvisionmanager.client;
 
 import com.kcn.hikvisionmanager.config.CameraConfig;
+import com.kcn.hikvisionmanager.events.model.CameraRestartInitiatedEvent;
 import com.kcn.hikvisionmanager.exception.CameraRequestException;
 import com.kcn.hikvisionmanager.exception.CameraUnauthorizedException;
 import com.kcn.hikvisionmanager.service.ProgressListener;
@@ -12,6 +13,7 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.Timeout;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
@@ -21,10 +23,13 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 /**
  * Service responsible for streaming video downloads from Hikvision camera via HTTP.
  * Handles large file downloads with progress tracking and atomic file operations.
+ * Automatically pauses operations during camera restart grace period.
  */
 @Slf4j
 @Component
@@ -32,6 +37,9 @@ public class HttpDownloadClient {
 
     private final CloseableHttpClient httpClient;
     private final CameraConfig cameraConfig;
+
+    // Grace period tracking for camera restart
+    private volatile LocalDateTime restartGraceUntil = null;
 
     public HttpDownloadClient(CloseableHttpClient httpClient, CameraConfig cameraConfig) {
         this.httpClient = httpClient;
@@ -41,8 +49,24 @@ public class HttpDownloadClient {
     }
 
     /**
+     * Event listener that handles camera restart initialization.
+     * Sets grace period during which download attempts will wait.
+     *
+     * @param event Camera restart event containing grace period duration
+     */
+    @EventListener
+    public void onCameraRestart(CameraRestartInitiatedEvent event) {
+        restartGraceUntil = event.getOccurredAt().plusSeconds(event.getGracePeriodSeconds());
+        log.info("⏸️ [{}] HTTP download client paused for {} seconds due to camera restart (until: {})",
+                Thread.currentThread().getName(),
+                event.getGracePeriodSeconds(),
+                restartGraceUntil);
+    }
+
+    /**
      * Downloads video recording from camera using HTTP GET with XML payload.
      * Streams response directly to file with progress tracking and atomic file operations.
+     * Automatically waits during camera restart grace period.
      *
      * @param url ISAPI download endpoint (e.g., /ISAPI/ContentMgmt/download)
      * @param xmlPayload XML body containing playbackURI and time range
@@ -59,6 +83,14 @@ public class HttpDownloadClient {
             Path outputPath,
             ProgressListener progressListener,
             int timeoutMinutes) throws IOException {
+
+        // CRITICAL: Wait if camera is restarting before initiating HTTP request
+        try {
+            waitIfCameraRestarting();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Download interrupted during camera restart wait", e);
+        }
 
         log.debug("🎬 [{}] Starting HTTP download stream to: {}",
                 Thread.currentThread().getName(), outputPath.getFileName());
@@ -124,6 +156,40 @@ public class HttpDownloadClient {
             // Cleanup temporary file on any error
             cleanupTempFile(tempFile);
             throw e;
+        }
+    }
+
+    /**
+     * Waits if camera is currently in restart grace period.
+     * Blocks the calling thread until grace period expires.
+     *
+     * @throws InterruptedException if thread is interrupted while waiting
+     */
+    private void waitIfCameraRestarting() throws InterruptedException {
+        if (restartGraceUntil == null) {
+            return; // No restart in progress
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Check if grace period is still active
+        if (now.isBefore(restartGraceUntil)) {
+            long secondsToWait = Duration.between(now, restartGraceUntil).getSeconds();
+            log.info("⏳ [{}] HTTP download client waiting {} seconds for camera restart (until: {})",
+                    Thread.currentThread().getName(),
+                    secondsToWait,
+                    restartGraceUntil);
+
+            // Sleep until grace period ends
+            Thread.sleep(secondsToWait * 1000L);
+
+            // Reset grace period after waiting
+            restartGraceUntil = null;
+            log.info("✅ [{}] Camera restart grace period ended, resuming HTTP downloads",
+                    Thread.currentThread().getName());
+        } else {
+            // Grace period already expired
+            restartGraceUntil = null;
         }
     }
 

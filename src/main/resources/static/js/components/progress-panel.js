@@ -140,10 +140,12 @@ class ProgressPanel {
       this.updateUI(data);
 
       // Stop polling if completed or failed
-      if (data.status === 'COMPLETED' || data.status === 'FAILED') {
+    if (data.status === 'COMPLETED' ||
+        data.status === 'FAILED' ||
+        data.status === 'PARTIAL_FAILURE') {  // ✅ ADD THIS
         this.cleanup();
         this.showCompletion(data);
-      }
+    }
     } catch (error) {
       console.error('Progress poll error:', error);
 
@@ -282,19 +284,25 @@ class ProgressPanel {
    */
   showCompletion(data) {
     const isSuccess = data.status === 'COMPLETED' && data.failed === 0;
+    const isPartial = data.status === 'PARTIAL_FAILURE';
 
     // Update batch progress bar color
     if (this.elements.batchBar) {
-      this.elements.batchBar.classList.remove('bg-primary');
-      this.elements.batchBar.classList.add(isSuccess ? 'bg-success' : 'bg-danger');
-      this.elements.batchBar.style.width = '100%';
+        this.elements.batchBar.classList.remove('bg-primary');
+        this.elements.batchBar.classList.add(
+            isSuccess ? 'bg-success' :
+            isPartial ? 'bg-warning' :
+            'bg-danger'
+        );
+        this.elements.batchBar.style.width = '100%';
     }
 
     // Update message
     if (this.elements.batchText) {
-      this.elements.batchText.textContent = isSuccess
-        ? '✅ All files downloaded successfully'
-        : `⚠️ Completed with ${data.failed} failed`;
+        this.elements.batchText.textContent =
+            isSuccess ? '✅ All files downloaded successfully' :
+            isPartial ? `⚠️ Completed with ${data.failed} failed (${data.completed}/${data.total} successful)` :  // ✅ ADD THIS
+            `❌ Completed with ${data.failed} failed`;
     }
 
     // Hide file progress
