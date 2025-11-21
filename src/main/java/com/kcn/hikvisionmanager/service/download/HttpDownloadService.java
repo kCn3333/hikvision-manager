@@ -104,7 +104,7 @@ public class HttpDownloadService {
                 // On last attempt, try camera restart
                 if (attempt == MAX_RETRY_ATTEMPTS - 1) {
                     log.warn("🔄 Last retry attempt - restarting camera...");
-                    tryRestartCamera(); // This now includes waiting internally
+                    tryRestartCamera();
                 }
 
             } catch (InterruptedException e) {

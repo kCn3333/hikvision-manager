@@ -132,6 +132,7 @@ public class AppConfig {
                 Caffeine.newBuilder()
                         .expireAfterWrite(CAMERA_STATUS_TTL, TimeUnit.SECONDS)
                         .maximumSize(10)
+                        .recordStats()
                         .build());
 
         // Camera info cache - static data, longer TTL
@@ -139,6 +140,7 @@ public class AppConfig {
                 Caffeine.newBuilder()
                         .expireAfterWrite(CAMERA_INFO_TTL, TimeUnit.MINUTES)
                         .maximumSize(2)
+                        .recordStats()
                         .build());
 
         // Download jobs cache - active downloads tracking

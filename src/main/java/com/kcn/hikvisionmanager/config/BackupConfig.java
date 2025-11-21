@@ -97,7 +97,7 @@ public class BackupConfig {
     @PostConstruct
     public void validateAndInitialize() {
         initDirectories();
-        log.info("✅ BackupConfig initialized: baseDir={}, retention={} days, schedule={}",
+        log.info("✅ BackupConfig initialized: baseDir={}, default: retention={} days, schedule={}",
                 baseDir, defaultRetentionDays, defaultScheduleCron);
     }
 

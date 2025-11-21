@@ -9,7 +9,8 @@ This application is currently in **beta testing**. It may contain bugs and its f
 <p align="center">
   <a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/build.yml">
     <img src="https://github.com/kCn3333/hikvision-manager/actions/workflows/build.yml/badge.svg" />
-  </a><a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml">
+  </a><!--
+  --><a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml">
     <img src="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml/badge.svg" />
   </a>
 </p>
@@ -41,8 +42,10 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 
 ### 📼 Recordings Management
 - Browse and search camera recordings
-- Direct download links for recordings
-- Real-time statistics for downloads
+- Batch download multiple recordings
+- Real-time download progress tracking with speed and ETA
+- Download status monitoring (queued, downloading, completed, failed)
+- Automatic file management and cleanup
 
 ### 💾 Backup System
 - Automated scheduled backups
@@ -50,6 +53,7 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 - Live backup progress tracking 
 - Detailed logs for every backup
 - Retention and cleanup policies
+- Backup history with statistics
 
 ### 🛠️ Camera Management
 - Camera restart functionality
@@ -255,7 +259,9 @@ hikvision-manager/
 - Always change default PostgreSQL and camera passwords
 - Consider running behind reverse proxy (nginx, caddy)
 - Enable HTTPS for production deployment
-- Restrict network access to camera
+- Use VPN for remote access
+- Restrict camera access to local network only
+- Consider using VLANs to isolate camera network
 
 
 ## 📝 License

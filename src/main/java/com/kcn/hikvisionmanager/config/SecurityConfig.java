@@ -61,7 +61,7 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
-                            log.info("🚪 User logged out successfully");
+                            log.info("\uD83D\uDEAA User logged out successfully");
                             response.sendRedirect("/login?logout");
                         })
                         .invalidateHttpSession(true)
@@ -81,7 +81,7 @@ public class SecurityConfig {
 
 
         if (httpsOnly) {
-            log.info("🔒 HTTPS-only mode ENABLED - all requests redirected to HTTPS");
+            log.info("\uD83D\uDD12 HTTPS-only mode ENABLED - all requests redirected to HTTPS");
             http.redirectToHttps(withDefaults());
         }
 

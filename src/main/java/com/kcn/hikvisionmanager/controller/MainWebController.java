@@ -32,7 +32,7 @@ public class MainWebController {
         String sessionId = httpSession.getId();
         String username = (principal != null) ? principal.getName() : "Guest";
 
-        log.info("📍 User {} accessed index page, sessionId: {}", username, sessionId);
+        log.info("\uD83D\uDE46\uD83C\uDFFB\u200D♂\uFE0F User {} accessed index page, sessionId: {}", username, sessionId);
 
         model.addAttribute("sessionId", sessionId);
         model.addAttribute("username", username);
