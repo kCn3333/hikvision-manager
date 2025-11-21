@@ -30,7 +30,9 @@ RUN apk update && \
     rm -rf /var/cache/apk/*
 
 # Create non-root user
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN addgroup -S spring && adduser -S spring -G spring && \
+    mkdir -p /app/logs /app/tmp /app/backups && \
+    chown -R spring:spring /app
 
 WORKDIR /app
 
