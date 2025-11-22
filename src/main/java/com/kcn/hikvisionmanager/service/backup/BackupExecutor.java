@@ -81,6 +81,7 @@ public class BackupExecutor {
             backupConfigurationRepository.save(config);
 
             // Create backup job in DB
+
             BackupJobEntity backupJob = createBackupJob(
                     backupJobId, config.getId(), now, backupDateRange, backupDir);
 
@@ -195,7 +196,7 @@ public class BackupExecutor {
                 .build();
 
         backupJobRepository.save(backupJob);
-        log.info("✅ Backup job created in DB: {}", backupJobId);
+        log.info("\uD83D\uDCBE Backup job saved in DB");
 
         return backupJob;
     }
@@ -257,7 +258,7 @@ public class BackupExecutor {
                 backupJob.getId()
         );
 
-        log.info("🚀 Batch download started: {} (files will be saved to {})", batchId, backupDir);
+        log.info("🚀 Backup download started, files will be saved to {}", backupDir);
     }
 
     /**
@@ -322,8 +323,8 @@ public class BackupExecutor {
         backupJob.setTotalSizeBytes(totalSize);
         backupJobRepository.save(backupJob);
 
-        log.info("🎉 Backup finalized: {} ({}/{} recordings, {} total)",
-                backupJobId, completed, backupJob.getTotalRecordings(),
+        log.info("🎉 Backup finalized: {}/{} recordings, {} total",
+                completed, backupJob.getTotalRecordings(),
                 formatBytes(totalSize));
 
         // Apply retention policy

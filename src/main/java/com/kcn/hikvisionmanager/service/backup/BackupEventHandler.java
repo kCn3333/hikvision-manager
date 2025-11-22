@@ -3,6 +3,7 @@ package com.kcn.hikvisionmanager.service.backup;
 import com.kcn.hikvisionmanager.entity.BackupRecordingEntity;
 import com.kcn.hikvisionmanager.domain.BackupRecordingStatus;
 import com.kcn.hikvisionmanager.events.model.*;
+import com.kcn.hikvisionmanager.repository.BackupConfigurationRepository;
 import com.kcn.hikvisionmanager.repository.BackupJobRepository;
 import com.kcn.hikvisionmanager.repository.BackupRecordingRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class BackupEventHandler {
 
     private final BackupRecordingRepository backupRecordingRepository;
     private final BackupJobRepository backupJobRepository;
+    private final BackupConfigurationRepository backupConfigRepository;
     private final BackupExecutor backupExecutor;
 
     // ===== EVENT LISTENERS (RECORDINGS) =====
@@ -106,6 +108,24 @@ public class BackupEventHandler {
     }
 
     // ===== EVENT LISTENERS (BACKUPS) =====
+
+    /**
+     * Handle scheduled backup trigger
+     */
+    @Async
+    @EventListener
+    public void onBackupTriggered(BackupTriggerEvent event) {
+        log.info("\uD83D\uDC49 Scheduled backup triggered for config ID: {}", event.configId());
+
+        try {
+            var config = backupConfigRepository.findById(event.configId())
+                    .orElseThrow(() -> new IllegalStateException("Config not found: " + event.configId()));
+            backupExecutor.executeBackup(config);
+
+        } catch (Exception e) {
+            log.error("❌ Failed to execute scheduled backup: {}", e.getMessage(), e);
+        }
+    }
 
     /**
      * Finalize backup when entire batch completes

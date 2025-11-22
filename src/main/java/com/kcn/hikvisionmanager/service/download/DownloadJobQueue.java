@@ -96,10 +96,10 @@ public class DownloadJobQueue {
             job.setStartedAt(LocalDateTime.now());
             repository.save(job);
 
-            log.info("\uD83D\uDE80 [{}] Starting download: {} (Job: {}, Method: {})",
+            log.info("\uD83D\uDE80 [{}] Starting download: {} (Method: {})",
                     Thread.currentThread().getName(),
                     job.getFileName(),
-                    job.getJobId(),
+                    //job.getJobId(),
                     config.getMethod().toUpperCase());
 
             if(job.isBackupJob())

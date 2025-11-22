@@ -54,7 +54,7 @@ public class BackupService {
         BackupConfigurationEntity config = configRepository.findById(configId)
                 .orElseThrow(() -> new BackupNotFoundException("Backup configuration not found: " + configId));
 
-        log.info("🔔 Triggering manual backup for config {}", config.getId());
+        log.info("🔔 Triggering manual backup for config: {}", config.getName());
         return backupExecutor.executeBackup(config);
     }
 
@@ -90,10 +90,16 @@ public class BackupService {
         existing.setCameraId(dto.getCameraId());
         existing.setRetentionDays(dto.getRetentionDays());
         existing.setEnabled(dto.isEnabled());
-        existing.setCronExpression(configMapper.generateCron(dto));
+        String newCron = configMapper.generateCron(dto);
+        // Only reset next run if cron changed or it was disabled/re-enabled
+        if (!newCron.equals(existing.getCronExpression()) || (!existing.isEnabled() && dto.isEnabled())) {
+            existing.setCronExpression(newCron);
+            existing.setNextRunAt(null); // Force scheduler to recalculate immediately
+            log.info("🔄 Schedule changed/reset for: {}", dto.getName());
+        }
 
         configRepository.save(existing);
-        log.info("✏️ Updated backup configuration: {}", id);
+        log.info("✏️ Updated backup configuration: {}", dto.getName());
 
         return configMapper.toDTO(existing);
     }

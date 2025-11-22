@@ -2,7 +2,6 @@ package com.kcn.hikvisionmanager.mapper;
 
 import com.kcn.hikvisionmanager.entity.BackupJobEntity;
 import com.kcn.hikvisionmanager.dto.BackupJobDTO;
-import com.kcn.hikvisionmanager.util.TimeUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,12 +21,8 @@ public class BackupJobMapper {
                 .cameraId(entity.getConfiguration() != null
                         ? entity.getConfiguration().getCameraId()
                         : null)
-                .startedAt(entity.getStartedAt() != null
-                        ? TimeUtils.cameraUtcToLocal(entity.getStartedAt())
-                        : null)
-                .endTime(entity.getCompletedAt() != null
-                        ? TimeUtils.cameraUtcToLocal(entity.getCompletedAt())
-                        : null)
+                .startedAt(entity.getStartedAt())
+                .endTime(entity.getCompletedAt())
                 .totalFiles(entity.getTotalRecordings())
                 .completedFiles(entity.getCompletedRecordings())
                 .totalBytes(entity.getTotalSizeBytes() != null ? entity.getTotalSizeBytes() : 0)

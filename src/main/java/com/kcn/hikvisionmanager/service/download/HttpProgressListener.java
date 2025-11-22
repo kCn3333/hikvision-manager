@@ -80,8 +80,8 @@ public class HttpProgressListener implements ProgressListener {
             long downloadTime = System.currentTimeMillis() - startTime;
             double averageSpeed = calculateAverageSpeedMbps(job.getDownloadedBytes(), downloadTime);
 
-            log.info("✅ HTTP Download completed: {} (Job: {}) in {}, Avg Speed: {} Mbps",
-                    job.getFileName(), job.getJobId(), formatDuration(downloadTime), averageSpeed);
+            log.info("✅ HTTP Download completed: {} in {}, Avg Speed: {} Mbps",
+                    job.getFileName(), formatDuration(downloadTime), averageSpeed);
 
             if (job.isBackupJob()) {
                 publisher.publishDownloadCompleted(job.getRecordingId(), job.getBatchId(), job.getActualFileSizeBytes());
