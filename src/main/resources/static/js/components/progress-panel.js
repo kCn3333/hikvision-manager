@@ -1,6 +1,7 @@
 /**
  * Universal Progress Panel
  * Handles both batch progress and individual file download progress
+ * Persists state across page navigation using sessionStorage
  */
 
 import { API, POLLING_CONFIG } from '../core/api.js';
@@ -47,6 +48,26 @@ class ProgressPanel {
     };
 
     this.elements.closeBtn?.addEventListener('click', () => this.hide());
+
+    // Resume active batch if exists
+    this.resumeIfActive();
+  }
+
+  /**
+   * Resume polling if there's an active batch in session storage
+   */
+  resumeIfActive() {
+    const activeBatchId = sessionStorage.getItem('activeBatchId');
+    const startTime = sessionStorage.getItem('batchStartTime');
+
+    if (activeBatchId && startTime) {
+      console.debug('Resuming progress panel for batch:', activeBatchId);
+      this.currentBatchId = activeBatchId;
+      this.startTime = parseInt(startTime);
+      this.show();
+      this.poll(); // First poll immediately
+      this.pollInterval = setInterval(() => this.poll(), POLLING_CONFIG.interval);
+    }
   }
 
   /**
@@ -60,6 +81,11 @@ class ProgressPanel {
 
     this.currentBatchId = batchId;
     this.startTime = Date.now();
+
+    // Persist to sessionStorage for cross-page navigation
+    sessionStorage.setItem('activeBatchId', batchId);
+    sessionStorage.setItem('batchStartTime', this.startTime.toString());
+
     this.show();
     this.poll();
 
@@ -71,15 +97,20 @@ class ProgressPanel {
    * Show panel
    */
   show() {
-        this.container.classList.add('active');
-        this.resetUI();
+    this.container.classList.add('active');
+    this.resetUI();
   }
+
   /**
    * Hide panel
    */
   hide() {
     this.container.classList.remove('active');
     this.cleanup();
+
+    // Clear session storage
+    sessionStorage.removeItem('activeBatchId');
+    sessionStorage.removeItem('batchStartTime');
   }
 
   /**
@@ -89,7 +120,7 @@ class ProgressPanel {
     // Reset batch progress
     if (this.elements.batchBar) {
       this.elements.batchBar.style.width = '0%';
-      this.elements.batchBar.classList.remove('bg-success', 'bg-danger');
+      this.elements.batchBar.classList.remove('bg-success', 'bg-danger', 'bg-warning');
       this.elements.batchBar.classList.add('bg-primary');
     }
 
@@ -139,13 +170,13 @@ class ProgressPanel {
       const data = await http.get(API.batch.status(this.currentBatchId));
       this.updateUI(data);
 
-      // Stop polling if completed or failed
-    if (data.status === 'COMPLETED' ||
-        data.status === 'FAILED' ||
-        data.status === 'PARTIAL_FAILURE') {  // ✅ ADD THIS
+      // Stop polling if completed, failed, or partially failed
+      if (data.status === 'COMPLETED' ||
+          data.status === 'FAILED' ||
+          data.status === 'PARTIAL_FAILURE') {
         this.cleanup();
         this.showCompletion(data);
-    }
+      }
     } catch (error) {
       console.error('Progress poll error:', error);
 
@@ -153,6 +184,7 @@ class ProgressPanel {
       if (error.status === 404) {
         console.warn('Batch not found, stopping polling');
         this.cleanup();
+        this.hide();
       }
       // Continue polling on other errors (might be temporary network issue)
     }
@@ -288,21 +320,21 @@ class ProgressPanel {
 
     // Update batch progress bar color
     if (this.elements.batchBar) {
-        this.elements.batchBar.classList.remove('bg-primary');
-        this.elements.batchBar.classList.add(
-            isSuccess ? 'bg-success' :
-            isPartial ? 'bg-warning' :
-            'bg-danger'
-        );
-        this.elements.batchBar.style.width = '100%';
+      this.elements.batchBar.classList.remove('bg-primary');
+      this.elements.batchBar.classList.add(
+        isSuccess ? 'bg-success' :
+        isPartial ? 'bg-warning' :
+        'bg-danger'
+      );
+      this.elements.batchBar.style.width = '100%';
     }
 
     // Update message
     if (this.elements.batchText) {
-        this.elements.batchText.textContent =
-            isSuccess ? '✅ All files downloaded successfully' :
-            isPartial ? `⚠️ Completed with ${data.failed} failed (${data.completed}/${data.total} successful)` :  // ✅ ADD THIS
-            `❌ Completed with ${data.failed} failed`;
+      this.elements.batchText.textContent =
+        isSuccess ? '✅ All files downloaded successfully' :
+        isPartial ? `⚠️ Completed with ${data.failed} failed (${data.completed}/${data.total} successful)` :
+        `❌ Completed with ${data.failed} failed`;
     }
 
     // Hide file progress
@@ -320,6 +352,10 @@ class ProgressPanel {
     if (this.elements.closeBtn) {
       this.elements.closeBtn.style.display = 'block';
     }
+
+    // Clear session storage as batch is complete
+    sessionStorage.removeItem('activeBatchId');
+    sessionStorage.removeItem('batchStartTime');
   }
 
   /**
