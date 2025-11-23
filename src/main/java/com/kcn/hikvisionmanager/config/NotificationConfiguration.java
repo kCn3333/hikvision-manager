@@ -1,6 +1,8 @@
 package com.kcn.hikvisionmanager.config;
 
 import com.kcn.hikvisionmanager.domain.ParsedNotificationUrl;
+import com.kcn.hikvisionmanager.service.notification.NotificationService;
+import com.kcn.hikvisionmanager.service.notification.NtfyNotificationService;
 import com.kcn.hikvisionmanager.util.NotificationUrlParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,13 +31,14 @@ public class NotificationConfiguration {
      * Creates dedicated RestTemplate for notification delivery.
      * Configured with timeouts from notification properties.
      *
+     * @param builder injected by Spring, pre-configured with sensible defaults
      * @return Configured RestTemplate instance
      */
     @Bean
-    public RestTemplate notificationRestTemplate() {
-        return new RestTemplateBuilder()
-                .setConnectTimeout(Duration.ofSeconds(notificationProperties.getTimeoutSeconds()))
-                .setReadTimeout(Duration.ofSeconds(notificationProperties.getTimeoutSeconds()))
+    public RestTemplate notificationRestTemplate(RestTemplateBuilder builder) {
+        return builder
+                .connectTimeout(Duration.ofSeconds(notificationProperties.getTimeoutSeconds())) // was setConnectTimeout
+                .readTimeout(Duration.ofSeconds(notificationProperties.getTimeoutSeconds()))    // was setReadTimeout
                 .build();
     }
 
@@ -44,7 +47,7 @@ public class NotificationConfiguration {
      * Supports multiple notification providers simultaneously.
      * Invalid URLs are logged and skipped without stopping application startup.
      *
-     * @param restTemplate RestTemplate for HTTP requests
+     * @param notificationRestTemplate RestTemplate for HTTP requests
      * @param urlParser URL parser for notification URLs
      * @return List of active notification services
      */
