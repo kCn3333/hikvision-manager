@@ -87,7 +87,7 @@ public class NotificationListener {
             }
 
             // Check if notifications are enabled for this backup
-            if (!config.isNotifyOnComplete()) {
+            if (!config.getNotifyOnComplete()) {
                 log.debug("Notifications disabled for backup '{}' - skipping", config.getName());
                 return;
             }

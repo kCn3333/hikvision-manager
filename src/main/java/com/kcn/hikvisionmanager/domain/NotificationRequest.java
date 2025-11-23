@@ -32,10 +32,10 @@ public class NotificationRequest {
      */
     private String message;
 
-    /**
-     * Priority level: default, high, urgent
-     */
-    private String priority;
+//    /**
+//     * Priority level: default, high, urgent
+//     */
+//    private String priority;
 
     /**
      * Tags for categorization and emoji icons

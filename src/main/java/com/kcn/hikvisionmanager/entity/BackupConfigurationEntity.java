@@ -44,8 +44,8 @@ public class BackupConfigurationEntity {
     @Column(name = "backup_path", nullable = false, length = 500)
     private String backupPath;
 
-    @Column(name = "notify_on_complete", nullable = false)
-    private boolean notifyOnComplete;
+    @Column(name = "notify_on_complete", nullable = true)
+    private Boolean notifyOnComplete;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

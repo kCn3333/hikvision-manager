@@ -37,6 +37,7 @@ public class BackupConfigMapper {
                 .backupPath(backupConfig.getBaseDir().toString())
                 .cronExpression(generateCron(dto))
                 .retentionDays(dto.getRetentionDays())
+                .notifyOnComplete(dto.isNotifyOnComplete())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .timeRangeStrategy(dto.getTimeRangeStrategy() != null
@@ -62,7 +63,7 @@ public class BackupConfigMapper {
                 .time(parseCron(entity.getCronExpression()).time)
                 .dayOfWeek(parseCron(entity.getCronExpression()).dayOfWeek)
                 .retentionDays(entity.getRetentionDays())
-                .notifyOnComplete(false)
+                .notifyOnComplete(entity.getNotifyOnComplete() !=null ? entity.getNotifyOnComplete() : false)
                 .timeRangeStrategy(entity.getTimeRangeStrategy() != null
                         ? entity.getTimeRangeStrategy()
                         : BackupTimeRangeStrategy.LAST_24_HOURS)

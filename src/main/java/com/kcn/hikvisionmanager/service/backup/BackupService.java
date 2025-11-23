@@ -90,8 +90,9 @@ public class BackupService {
         existing.setCameraId(dto.getCameraId());
         existing.setRetentionDays(dto.getRetentionDays());
         existing.setEnabled(dto.isEnabled());
+        existing.setNotifyOnComplete(dto.isNotifyOnComplete());
         String newCron = configMapper.generateCron(dto);
-        // Only reset next run if cron changed or it was disabled/re-enabled
+         // Only reset next run if cron changed or it was disabled/re-enabled
         if (!newCron.equals(existing.getCronExpression()) || (!existing.isEnabled() && dto.isEnabled())) {
             existing.setCronExpression(newCron);
             existing.setNextRunAt(null); // Force scheduler to recalculate immediately

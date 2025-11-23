@@ -81,7 +81,7 @@ public class NotificationUrlParser {
                 port = useHttps ? 443 : 80;
             }
 
-            log.debug("Parsed notification URL - scheme: {}, host: {}, port: {}, topic: {}, https: {}",
+            log.info("Parsed notification URL - scheme: {}, host: {}, port: {}, topic: {}, https: {}",
                     scheme, host, port, topic, useHttps);
 
             return ParsedNotificationUrl.builder()
