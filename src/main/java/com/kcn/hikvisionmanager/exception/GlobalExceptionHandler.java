@@ -81,6 +81,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
+    @ExceptionHandler(CameraDeviceErrorException.class)
+    public ResponseEntity<ApiErrorResponse> handleCameraDeviceError(
+            CameraDeviceErrorException ex, HttpServletRequest request) {
+
+        // Using 503 Service Unavailable because the device is likely overloaded/busy
+        ApiErrorResponse response = ApiErrorResponse.of(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Camera device error: " + ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        log.warn("🔥 Camera internal device error on {}: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
     @ExceptionHandler(CameraOfflineException.class)
     public ResponseEntity<ApiErrorResponse> handleCameraOfflineException(
             CameraOfflineException ex, HttpServletRequest request) {

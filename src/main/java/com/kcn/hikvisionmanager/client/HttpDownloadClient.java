@@ -2,6 +2,7 @@ package com.kcn.hikvisionmanager.client;
 
 import com.kcn.hikvisionmanager.config.CameraConfig;
 import com.kcn.hikvisionmanager.events.model.CameraRestartInitiatedEvent;
+import com.kcn.hikvisionmanager.exception.CameraDeviceErrorException;
 import com.kcn.hikvisionmanager.exception.CameraRequestException;
 import com.kcn.hikvisionmanager.exception.CameraUnauthorizedException;
 import com.kcn.hikvisionmanager.service.ProgressListener;
@@ -117,12 +118,23 @@ public class HttpDownloadClient {
         try {
             httpClient.execute(httpGet, response -> {
                 int statusCode = response.getCode();
+
                 log.debug("Download response status: {}", statusCode);
 
                 // Handle authentication errors
                 if (statusCode == 401 || statusCode == 403) {
                     throw new CameraUnauthorizedException(
                             "Unauthorized download request to camera " + cameraConfig.getIp());
+                }
+                // Handle Hikvision device error
+                if (statusCode == 500) {
+                    String errorBody = EntityUtils.toString(response.getEntity());
+                    if(errorBody.contains("<subStatusCode>deviceError</subStatusCode>")) {
+                        throw new CameraDeviceErrorException(
+                                "Camera returned DEVICE ERROR. The device is overloaded or internal buffer failed."
+                        );
+                    }
+                    throw new CameraRequestException("500 Internal Error: " + errorBody);
                 }
 
                 // Handle HTTP errors
