@@ -48,6 +48,9 @@ services:
       CAMERA_RTSP_PORT: ${CAMERA_RTSP_PORT:-554}
       TIMEZONE: ${TIMEZONE:-UTC}
 
+      # Notification
+      NTFY: ${NTFY:-}
+
     volumes:
       - stream_temp:/tmp/stream
       - recordings:/tmp/recordings
