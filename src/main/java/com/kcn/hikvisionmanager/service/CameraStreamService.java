@@ -78,7 +78,7 @@ public class CameraStreamService {
 
             String playlist = "/streams/" + sessionId + "/index.m3u8";
 
-            log.info("📡 HLS stream started for session={} channel={} → {}", sessionId, channelId, playlist);
+            log.info("📡 HLS stream started for channel={}", channelId);
 
             return playlist;
 
