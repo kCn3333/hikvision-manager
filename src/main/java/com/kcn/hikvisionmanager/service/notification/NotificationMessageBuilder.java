@@ -27,9 +27,9 @@ public class NotificationMessageBuilder {
 
         // Status header
         if (status == BackupJobStatus.COMPLETED) {
-            message.append("✅ **Backup Completed Successfully**\n\n");
+            message.append("\uD83D\uDCE5 Camera Backup Completed Successfully\n\n");
         } else if (status == BackupJobStatus.FAILED) {
-            message.append("❌ **Backup Failed**\n\n");
+            message.append("❌ Backup Failed\n\n");
         }
 
         // Recordings summary
@@ -37,7 +37,7 @@ public class NotificationMessageBuilder {
         int completedRecordings = getIntValue(stats, "completedRecordings");
         int failedRecordings = getIntValue(stats, "failedRecordings");
 
-        message.append(String.format("📊 **Recordings:** %d/%d completed",
+        message.append(String.format("📊 - Recordings: %d/%d completed",
                 completedRecordings, totalRecordings));
 
         if (failedRecordings > 0) {
@@ -48,26 +48,26 @@ public class NotificationMessageBuilder {
         // File size
         String totalSize = getStringValue(stats, "totalSizeFormatted");
         if (totalSize != null && !totalSize.equals("0 B")) {
-            message.append(String.format("💾 **Size:** %s\n", totalSize));
+            message.append(String.format("💾 - Size: %s\n", totalSize));
         }
 
         // Duration
         String duration = getStringValue(stats, "durationFormatted");
         if (duration != null) {
-            message.append(String.format("⏱️ **Duration:** %s\n", duration));
+            message.append(String.format("⏱️ - Duration: %s\n", duration));
         }
 
         // Backup directory
         String backupDir = getStringValue(stats, "backupDirectory");
         if (backupDir != null) {
-            message.append(String.format("\n📂 **Location:** `%s`", backupDir));
+            message.append(String.format("\n📂 - Location: `%s`", backupDir));
         }
 
         // Error message for failed backups
         if (status == BackupJobStatus.FAILED) {
             String errorMessage = getStringValue(stats, "errorMessage");
             if (errorMessage != null) {
-                message.append(String.format("\n\n⚠️ **Error:** %s", errorMessage));
+                message.append(String.format("\n\n⚠️ Error: %s", errorMessage));
             }
         }
 

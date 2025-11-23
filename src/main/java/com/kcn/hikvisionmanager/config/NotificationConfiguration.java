@@ -58,12 +58,17 @@ public class NotificationConfiguration {
 
         List<NotificationService> services = new ArrayList<>();
 
-        if (notificationProperties.getUrls().isEmpty()) {
+        // Filter out empty/blank URLs
+        List<String> validUrls = notificationProperties.getUrls().stream()
+                .filter(url -> url != null && !url.isBlank())
+                .toList();
+
+        if (validUrls.isEmpty()) {
             log.info("ℹ️ No notification URLs configured - notifications disabled");
             return services;
         }
 
-        for (String url : notificationProperties.getUrls()) {
+        for (String url : validUrls) {
             try {
                 ParsedNotificationUrl parsed = urlParser.parse(url);
 
