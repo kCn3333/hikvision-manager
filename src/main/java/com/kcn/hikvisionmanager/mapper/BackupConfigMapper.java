@@ -35,6 +35,7 @@ public class BackupConfigMapper {
                 .cameraId(dto.getCameraId())
                 .enabled(dto.isEnabled())
                 .backupPath(backupConfig.getBaseDir().toString())
+                .timeRangeStrategy(dto.getTimeRangeStrategy())
                 .cronExpression(generateCron(dto))
                 .retentionDays(dto.getRetentionDays())
                 .notifyOnComplete(dto.isNotifyOnComplete())
