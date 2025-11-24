@@ -91,6 +91,7 @@ public class BackupService {
         existing.setRetentionDays(dto.getRetentionDays());
         existing.setEnabled(dto.isEnabled());
         existing.setNotifyOnComplete(dto.isNotifyOnComplete());
+        existing.setTimeRangeStrategy(dto.getTimeRangeStrategy());
         String newCron = configMapper.generateCron(dto);
          // Only reset next run if cron changed or it was disabled/re-enabled
         if (!newCron.equals(existing.getCronExpression()) || (!existing.isEnabled() && dto.isEnabled())) {
