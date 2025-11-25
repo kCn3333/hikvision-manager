@@ -1,7 +1,8 @@
-package com.kcn.hikvisionmanager.service.notification;
+package com.kcn.hikvisionmanager.service.notification.ntfy;
 
 import com.kcn.hikvisionmanager.domain.NotificationRequest;
 import com.kcn.hikvisionmanager.domain.ParsedNotificationUrl;
+import com.kcn.hikvisionmanager.service.notification.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
