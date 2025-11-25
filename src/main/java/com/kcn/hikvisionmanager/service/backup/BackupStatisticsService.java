@@ -45,7 +45,7 @@ public class BackupStatisticsService {
         LocalDateTime weekAgo = LocalDateTime.now().minusDays(7);
         List<BackupJobEntity> recentBackups = jobRepository.findByDateRange(weekAgo, LocalDateTime.now());
 
-        double successRate = calculateSuccessRate(completedBackups, totalBackups);
+        double successRate = calculateSuccessRate(completedBackups, completedBackups + failedBackups);
 
         long averageBackupSize = completedBackups > 0 ? totalSize / completedBackups : 0;
 

@@ -101,7 +101,7 @@ class BackupManager {
     if (!configs || configs.length === 0) {
       this.tableBody.innerHTML = `
         <tr>
-          <td colspan="8" class="text-secondary py-3">
+          <td colspan="9" class="text-secondary py-3">
             No backup configurations found.
           </td>
         </tr>
@@ -115,6 +115,7 @@ class BackupManager {
         <td>${this.escapeHtml(cfg.name)}</td>
         <td>${this.escapeHtml(cfg.cameraId)}</td>
         <td><span class="badge bg-secondary">${cfg.scheduleType}</span></td>
+        <td><span class="badge bg-secondary">${cfg.timeRangeStrategy || '—'}</span></td>
         <td>${cfg.time || '—'}</td>
         <td>${cfg.retentionDays} days</td>
         <td>${cfg.notifyOnComplete ? '✅' : '❌'}</td>

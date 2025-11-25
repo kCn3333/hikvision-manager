@@ -50,6 +50,7 @@ services:
 
       # Notification
       NTFY: ${NTFY:-}
+      DISCORD: ${DISCORD:-}
 
     volumes:
       - stream_temp:/tmp/stream
