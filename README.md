@@ -9,8 +9,7 @@ This application is currently in **beta testing**. It may contain bugs and its f
 <p align="center">
   <a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/build.yml">
     <img src="https://github.com/kCn3333/hikvision-manager/actions/workflows/build.yml/badge.svg" />
-  </a><!--
-  --><a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml">
+  </a><a href="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml">
     <img src="https://github.com/kCn3333/hikvision-manager/actions/workflows/docker.yml/badge.svg" />
   </a>
 </p>
@@ -31,6 +30,7 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 ## 📚 Documentation
 - [API Reference](docs/api.md)
 - [Screenshots](docs/screenshots.md)
+- [Notifications](docs/notifications.md)
 
 ## ✨ Features
 
@@ -54,6 +54,14 @@ It integrates with Hikvision ISAPI endpoints, schedules recording backups, store
 - Detailed logs for every backup
 - Retention and cleanup policies
 - Backup history with statistics
+
+### 🔔 Notifications
+
+Hikvision Manager supports multiple notification providers for backup alerts:
+
+- **NTFY** - Self-hosted or public push notifications
+- **Discord** - Embedded messages in Discord channels
+- **Generic Webhook** - Integration with Zapier, n8n, Make.com, or custom APIs
 
 ### 🛠️ Camera Management
 - Camera restart functionality
