@@ -1,8 +1,10 @@
 package com.kcn.hikvisionmanager.config;
 
 import com.kcn.hikvisionmanager.domain.ParsedNotificationUrl;
+import com.kcn.hikvisionmanager.service.notification.GenericWebhookNotificationService;
 import com.kcn.hikvisionmanager.service.notification.NotificationService;
-import com.kcn.hikvisionmanager.service.notification.NtfyNotificationService;
+import com.kcn.hikvisionmanager.service.notification.discord.DiscordNotificationService;
+import com.kcn.hikvisionmanager.service.notification.ntfy.NtfyNotificationService;
 import com.kcn.hikvisionmanager.util.NotificationUrlParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,9 +77,10 @@ public class NotificationConfiguration {
                 NotificationService service = switch (parsed.getScheme()) {
                     case "ntfy", "ntfys" -> new NtfyNotificationService(
                             notificationRestTemplate, parsed);
-                    // Future providers:
-                    // case "webhook" -> new WebhookNotificationService(...)
-                    // case "discord" -> new DiscordNotificationService(...)
+                    case "discord" -> new DiscordNotificationService(
+                            notificationRestTemplate, parsed);
+                    case "webhook" -> new GenericWebhookNotificationService(
+                            notificationRestTemplate, parsed);
                     default -> {
                         log.warn("⚠️ Unknown notification scheme '{}' in URL: {}",
                                 parsed.getScheme(), maskUrl(url));

@@ -1,6 +1,7 @@
 package com.kcn.hikvisionmanager.service.notification;
 
 import com.kcn.hikvisionmanager.domain.BackupJobStatus;
+import com.kcn.hikvisionmanager.service.notification.discord.NotificationColor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +38,7 @@ public class NotificationMessageBuilder {
         int completedRecordings = getIntValue(stats, "completedRecordings");
         int failedRecordings = getIntValue(stats, "failedRecordings");
 
-        message.append(String.format("📊 - Recordings: %d/%d completed",
+        message.append(String.format("\t📊 Recordings: %d/%d completed",
                 completedRecordings, totalRecordings));
 
         if (failedRecordings > 0) {
@@ -48,19 +49,19 @@ public class NotificationMessageBuilder {
         // File size
         String totalSize = getStringValue(stats, "totalSizeFormatted");
         if (totalSize != null && !totalSize.equals("0 B")) {
-            message.append(String.format("💾 - Size: %s\n", totalSize));
+            message.append(String.format("\t💾 Size: %s\n", totalSize));
         }
 
         // Duration
         String duration = getStringValue(stats, "durationFormatted");
         if (duration != null) {
-            message.append(String.format("⏱️ - Duration: %s\n", duration));
+            message.append(String.format("\t⏱️ Duration: %s\n", duration));
         }
 
         // Backup directory
         String backupDir = getStringValue(stats, "backupDirectory");
         if (backupDir != null) {
-            message.append(String.format("\n📂 - Location: `%s`", backupDir));
+            message.append(String.format("\n📂 Location: `%s`", backupDir));
         }
 
         // Error message for failed backups
@@ -72,6 +73,46 @@ public class NotificationMessageBuilder {
         }
 
         return message.toString();
+    }
+
+    /**
+     * Gets appropriate color based on backup status and results.
+     * Used for Discord embeds and other visual notifications.
+     *
+     * @param stats Job statistics
+     * @param status Final backup job status
+     * @return Notification color
+     */
+    public NotificationColor getColorForStatus(Map<String, Object> stats, BackupJobStatus status) {
+        if (status == BackupJobStatus.FAILED) {
+            return NotificationColor.ERROR;
+        }
+
+        int failedRecordings = getIntValue(stats, "failedRecordings");
+        if (failedRecordings > 0) {
+            return NotificationColor.WARNING;
+        }
+
+        return NotificationColor.SUCCESS;
+    }
+
+    /**
+     * Gets structured backup data for providers that support it.
+     * Used by Discord, Slack, and other rich notification formats.
+     *
+     * @param stats Job statistics
+     * @return Map of structured data fields
+     */
+    public Map<String, String> getStructuredData(Map<String, Object> stats) {
+        return Map.of(
+                "recordings", String.format("%d/%d completed",
+                        getIntValue(stats, "completedRecordings"),
+                        getIntValue(stats, "totalRecordings")),
+                "failed", String.valueOf(getIntValue(stats, "failedRecordings")),
+                "size", getStringValue(stats, "totalSizeFormatted"),
+                "duration", getStringValue(stats, "durationFormatted"),
+                "directory", getStringValue(stats, "backupDirectory")
+        );
     }
 
     /**
