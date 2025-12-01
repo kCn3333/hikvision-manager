@@ -61,7 +61,7 @@ public class AppConfig {
     @Value("${thread-pool.camera.max-size:4}")
     private int cameraPoolMaxSize;
 
-    @Value("${thread-pool.camera.queue-capacity:100}")
+    @Value("${thread-pool.camera.queue-capacity:1000}")
     private int cameraPoolQueueCapacity;
 
     @Value("${thread-pool.stream.core-size:1}")
